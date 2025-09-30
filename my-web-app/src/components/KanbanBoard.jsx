@@ -14,10 +14,17 @@ export default function KanbanBoard() {
 
   if (!activeProject) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Project Selected</h2>
-          <p className="text-gray-600">Create or select a project to get started.</p>
+      <div className="flex items-center justify-center h-full p-8">
+        <div className="text-center max-w-md mx-auto">
+          <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Plus className="w-8 h-8 text-gray-400" />
+          </div>
+          <h2 className="text-2xl font-semibold text-white mb-3">No Project Selected</h2>
+          <p className="text-gray-400 mb-6">Create or select a project to get started with your tasks.</p>
+          <button className="btn-primary">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Project
+          </button>
         </div>
       </div>
     );
@@ -62,14 +69,14 @@ export default function KanbanBoard() {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full p-6">
       {/* Project Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{activeProject.name}</h2>
+            <h2 className="text-3xl font-bold text-white mb-2">{activeProject.name}</h2>
             {activeProject.description && (
-              <p className="text-gray-600 mt-1">{activeProject.description}</p>
+              <p className="text-gray-400 text-lg">{activeProject.description}</p>
             )}
           </div>
 
@@ -77,9 +84,9 @@ export default function KanbanBoard() {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setShowColumnForm(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn-primary"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 mr-2" />
               <span>Add Column</span>
             </button>
           </div>

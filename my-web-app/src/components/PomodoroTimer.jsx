@@ -52,17 +52,17 @@ export default function PomodoroTimer() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-soft hover:shadow-medium transition-shadow duration-200">
+    <div className="modern-card p-5 shadow-dark-medium">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg">
-            <Coffee className="w-4 h-4 text-red-600" />
+          <div className="flex items-center justify-center w-8 h-8 bg-danger-500/20 rounded-lg">
+            <Coffee className="w-4 h-4 text-danger-400" />
           </div>
           <div>
-            <h3 className="font-medium text-gray-900">
+            <h3 className="font-medium text-white">
               {pomodoroState.isWorkSession ? 'Work Session' : 'Break Time'}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               {pomodoroState.completedPomodoros} completed today
             </p>
           </div>
@@ -71,14 +71,14 @@ export default function PomodoroTimer() {
         <div className="flex items-center space-x-2">
           <button
             onClick={handleReset}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 text-gray-400 hover:text-accent-400 rounded-lg hover:bg-gray-700/50 transition-colors"
             title="Reset timer"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
           <button
             onClick={handleSkip}
-            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 rounded-md hover:bg-gray-100 transition-colors"
+            className="px-3 py-2 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors font-medium"
           >
             Skip
           </button>
@@ -88,7 +88,7 @@ export default function PomodoroTimer() {
       {/* Timer Display */}
       <div className="relative mb-4">
         <div className="text-center">
-          <div className="text-5xl font-mono font-bold text-gray-900 mb-3 tracking-tight">
+          <div className="text-5xl font-mono font-bold text-white mb-3 tracking-tight">
             {formatTime(pomodoroState.timeRemaining)}
           </div>
 
@@ -101,7 +101,7 @@ export default function PomodoroTimer() {
                   a 18.5 18.5 0 0 1 0 37
                   a 18.5 18.5 0 0 1 0 -37"
                 fill="none"
-                stroke="#f1f5f9"
+                stroke="#334155"
                 strokeWidth="2"
               />
               {/* Progress circle */}
@@ -110,15 +110,15 @@ export default function PomodoroTimer() {
                   a 18.5 18.5 0 0 1 0 37
                   a 18.5 18.5 0 0 1 0 -37"
                 fill="none"
-                stroke={pomodoroState.isWorkSession ? "#ef4444" : "#10b981"}
-                strokeWidth="2"
+                stroke={pomodoroState.isWorkSession ? "#ef4444" : "#22c55e"}
+                strokeWidth="3"
                 strokeDasharray={`${progress}, 100`}
                 strokeLinecap="round"
                 className="transition-all duration-300"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-gray-300">
                 {Math.round(progress)}%
               </span>
             </div>
@@ -130,10 +130,10 @@ export default function PomodoroTimer() {
       <div className="flex justify-center">
         <button
           onClick={handleStartPause}
-          className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-medium hover:shadow-large ${
+          className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-dark-medium hover:shadow-dark-large ${
             pomodoroState.isActive
-              ? 'bg-orange-500 text-white hover:bg-orange-600'
-              : 'bg-green-600 text-white hover:bg-green-700'
+              ? 'bg-warning-500 text-white hover:bg-warning-600'
+              : 'bg-success-500 text-white hover:bg-success-600'
           }`}
         >
           {pomodoroState.isActive ? (
@@ -151,8 +151,8 @@ export default function PomodoroTimer() {
       </div>
 
       {/* Session Info */}
-      <div className="mt-5 pt-4 border-t border-gray-100">
-        <div className="flex justify-between text-sm text-gray-600 font-medium">
+      <div className="mt-5 pt-4 border-t border-gray-700/50">
+        <div className="flex justify-between text-sm text-gray-400 font-medium">
           <span>Current: {pomodoroState.isWorkSession ? '25 min work' : '5 min break'}</span>
           <span>Next: {pomodoroState.isWorkSession ? '5 min break' : '25 min work'}</span>
         </div>

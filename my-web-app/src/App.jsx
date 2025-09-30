@@ -1,14 +1,16 @@
 import { AppProvider } from './context/AppContext';
+import Sidebar from './components/Sidebar';
 import KanbanBoard from './components/KanbanBoard';
-import Header from './components/Header';
 
 function App() {
   return (
     <AppProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container mx-auto px-4 py-6">
-          <KanbanBoard />
+      <div className="min-h-screen bg-dark-900 flex">
+        <Sidebar />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-auto">
+            <KanbanBoard />
+          </div>
         </main>
       </div>
     </AppProvider>

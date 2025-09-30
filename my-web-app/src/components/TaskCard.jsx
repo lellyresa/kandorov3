@@ -62,11 +62,11 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
       <div
         ref={setNodeRef}
         style={style}
-        className="bg-white rounded-lg border-2 border-blue-300 border-dashed opacity-50 p-4 shadow-lg"
+        className="modern-card border-2 border-accent-500/50 border-dashed opacity-60 p-4 shadow-dark-large"
       >
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
+          <div className="h-3 bg-gray-600/30 rounded w-3/4"></div>
         </div>
       </div>
     );
@@ -76,7 +76,7 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 group"
+      className="modern-card modern-card-hover group cursor-pointer"
     >
       <div className="p-4">
         {/* Drag Handle */}
@@ -84,7 +84,7 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
           <div
             {...attributes}
             {...listeners}
-            className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing rounded hover:bg-gray-100 transition-colors"
+            className="p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
           >
             <GripVertical className="w-4 h-4" />
           </div>
@@ -93,14 +93,14 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
           <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => setIsEditing(true)}
-              className="p-1 text-gray-400 hover:text-blue-600 rounded hover:bg-gray-100 transition-colors"
+              className="p-1 text-gray-400 hover:text-accent-400 rounded hover:bg-gray-700/50 transition-colors"
               title="Edit task"
             >
               <Edit className="w-3 h-3" />
             </button>
             <button
-              onClick={() => onDelete(task.id)}
-              className="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100 transition-colors"
+              onClick={() => onDelete && onDelete(task.id)}
+              className="p-1 text-gray-400 hover:text-danger-400 rounded hover:bg-gray-700/50 transition-colors"
               title="Delete task"
             >
               <Trash2 className="w-3 h-3" />
@@ -116,7 +116,7 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleKeyPress}
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-white placeholder-gray-400"
               placeholder="Task title"
               autoFocus
             />
@@ -124,20 +124,20 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
               onKeyDown={handleKeyPress}
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 text-sm bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-white placeholder-gray-400 resize-none"
               placeholder="Task description (optional)"
               rows={2}
             />
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleSave}
-                className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-3 py-2 text-xs bg-accent-600 hover:bg-accent-700 text-white rounded-lg transition-colors font-medium"
               >
                 Save
               </button>
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-3 py-2 text-xs text-gray-400 hover:text-gray-300 transition-colors font-medium"
               >
                 Cancel
               </button>
@@ -145,33 +145,33 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
           </div>
         ) : (
           <div>
-            <h4 className="font-medium text-gray-900 mb-2 leading-tight">
+            <h4 className="font-medium text-white mb-2 leading-tight">
               {task.title}
             </h4>
             {task.description && (
-              <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+              <p className="text-sm text-gray-300 mb-3 leading-relaxed">
                 {task.description}
               </p>
             )}
 
             {/* Task Metadata */}
-            <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center justify-between text-xs text-gray-400">
               <div className="flex items-center space-x-3">
                 {task.pomodoroCount > 0 && (
                   <div className="flex items-center space-x-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{task.pomodoroCount}</span>
+                    <Clock className="w-3 h-3 text-accent-400" />
+                    <span className="text-accent-400">{task.pomodoroCount}</span>
                   </div>
                 )}
-                <span className="text-gray-400">
+                <span className="text-gray-500">
                   {new Date(task.createdAt).toLocaleDateString()}
                 </span>
               </div>
 
               {task.status === 'done' && (
-                <div className="flex items-center space-x-1 text-green-600">
+                <div className="flex items-center space-x-1 text-success-400">
                   <CheckCircle className="w-3 h-3" />
-                  <span>Done</span>
+                  <span className="font-medium">Done</span>
                 </div>
               )}
             </div>

@@ -52,15 +52,19 @@ export default function Column({ column, tasks, projectId }) {
   return (
     <div className="flex flex-col h-full min-w-80 max-w-80">
       {/* Column Header */}
-      <div className={`bg-white rounded-t-xl border border-gray-200 p-4 ${
-        isActiveColumn ? 'border-red-200 bg-red-50/30' : ''
+      <div className={`modern-card rounded-t-xl p-4 ${
+        isActiveColumn ? 'bg-danger-500/10 border-danger-500/30' : ''
       }`}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
-            <h3 className={`font-semibold text-gray-900 ${isActiveColumn ? 'text-red-700' : ''}`}>
+            <h3 className={`font-semibold text-white ${isActiveColumn ? 'text-danger-300' : ''}`}>
               {column.title}
             </h3>
-            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+              isActiveColumn
+                ? 'bg-danger-500/20 text-danger-300'
+                : 'bg-gray-700/50 text-gray-300'
+            }`}>
               {tasks.length}
             </span>
           </div>
@@ -68,7 +72,7 @@ export default function Column({ column, tasks, projectId }) {
           <div className="flex items-center space-x-1">
             <button
               onClick={handleAddTask}
-              className="p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-accent-400 rounded-md hover:bg-gray-700/50 transition-colors"
               title="Add task"
             >
               <Plus className="w-4 h-4" />
@@ -77,14 +81,14 @@ export default function Column({ column, tasks, projectId }) {
               <>
                 <button
                   onClick={handleEditColumn}
-                  className="p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+                  className="p-1.5 text-gray-400 hover:text-accent-400 rounded-md hover:bg-gray-700/50 transition-colors"
                   title="Edit column"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleDeleteColumn}
-                  className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                  className="p-1.5 text-gray-400 hover:text-danger-400 rounded-md hover:bg-danger-500/20 transition-colors"
                   title="Delete column"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -103,23 +107,23 @@ export default function Column({ column, tasks, projectId }) {
 
         {/* Column Description */}
         {column.description && (
-          <p className="text-sm text-gray-600">{column.description}</p>
+          <p className="text-sm text-gray-300">{column.description}</p>
         )}
       </div>
 
       {/* Tasks Container */}
       <div
         ref={setNodeRef}
-        className={`flex-1 bg-gray-50 rounded-b-xl border border-t-0 border-gray-200 p-4 min-h-96 transition-all duration-200 ${
-          isActiveColumn ? 'border-red-200 bg-red-50/20' : ''
+        className={`flex-1 modern-card rounded-b-xl border-t-0 p-4 min-h-96 transition-all duration-200 ${
+          isActiveColumn ? 'bg-danger-500/5 border-danger-500/20' : ''
         } ${
-          isOver ? 'border-blue-300 bg-blue-50/50' : ''
+          isOver ? 'border-accent-500/30 bg-accent-500/5' : ''
         }`}
         style={{
           backgroundImage: isActiveColumn
-            ? 'radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.05) 0%, transparent 50%)'
+            ? 'radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.03) 0%, transparent 50%)'
             : isOver
-            ? 'radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
+            ? 'radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.05) 0%, transparent 50%)'
             : 'none'
         }}
       >
@@ -127,7 +131,7 @@ export default function Column({ column, tasks, projectId }) {
           <div className="space-y-3">
             {tasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-gray-400">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                <div className="w-12 h-12 rounded-full bg-gray-800/50 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6" />
                 </div>
                 <p className="text-sm text-center">
