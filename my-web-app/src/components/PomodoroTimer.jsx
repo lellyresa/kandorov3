@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Play, Pause, RotateCcw, Coffee } from 'lucide-react';
 
 export default function PomodoroTimer() {
   const { state, actions } = useApp();
   const { pomodoroState } = state;
-  const [isRunning, setIsRunning] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -52,10 +51,10 @@ export default function PomodoroTimer() {
   };
 
   return (
-    <div className="modern-card p-5 shadow-dark-medium">
-      <div className="flex items-center justify-between mb-4">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center w-8 h-8 bg-danger-500/20 rounded-lg">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-danger-500/20">
             <Coffee className="w-4 h-4 text-danger-400" />
           </div>
           <div>
@@ -71,66 +70,59 @@ export default function PomodoroTimer() {
         <div className="flex items-center space-x-2">
           <button
             onClick={handleReset}
-            className="p-2 text-gray-400 hover:text-accent-400 rounded-lg hover:bg-gray-700/50 transition-colors"
+            className="p-2 text-gray-400 hover:text-accent-400 rounded-lg hover:bg-gray-800/60 transition-colors"
             title="Reset timer"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
           <button
             onClick={handleSkip}
-            className="px-3 py-2 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors font-medium"
+            className="px-3 py-2 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800/60 transition-colors font-medium"
           >
             Skip
           </button>
         </div>
       </div>
 
-      {/* Timer Display */}
-      <div className="relative mb-4">
-        <div className="text-center">
-          <div className="text-5xl font-mono font-bold text-white mb-3 tracking-tight">
-            {formatTime(pomodoroState.timeRemaining)}
-          </div>
+      <div className="flex flex-col items-center gap-3">
+        <div className="text-5xl font-mono font-bold text-white tracking-tight">
+          {formatTime(pomodoroState.timeRemaining)}
+        </div>
 
-          {/* Progress Ring */}
-          <div className="relative w-36 h-36 mx-auto">
-            <svg className="w-36 h-36 transform -rotate-90" viewBox="0 0 42 42">
-              {/* Background circle */}
-              <path
-                d="M21 2.5
-                  a 18.5 18.5 0 0 1 0 37
-                  a 18.5 18.5 0 0 1 0 -37"
-                fill="none"
-                stroke="#334155"
-                strokeWidth="2"
-              />
-              {/* Progress circle */}
-              <path
-                d="M21 2.5
-                  a 18.5 18.5 0 0 1 0 37
-                  a 18.5 18.5 0 0 1 0 -37"
-                fill="none"
-                stroke={pomodoroState.isWorkSession ? "#ef4444" : "#22c55e"}
-                strokeWidth="3"
-                strokeDasharray={`${progress}, 100`}
-                strokeLinecap="round"
-                className="transition-all duration-300"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-300">
-                {Math.round(progress)}%
-              </span>
-            </div>
+        <div className="relative w-32 h-32">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 42 42">
+            <path
+              d="M21 2.5
+                a 18.5 18.5 0 0 1 0 37
+                a 18.5 18.5 0 0 1 0 -37"
+              fill="none"
+              stroke="#334155"
+              strokeWidth="2"
+            />
+            <path
+              d="M21 2.5
+                a 18.5 18.5 0 0 1 0 37
+                a 18.5 18.5 0 0 1 0 -37"
+              fill="none"
+              stroke={pomodoroState.isWorkSession ? '#ef4444' : '#22c55e'}
+              strokeWidth="3"
+              strokeDasharray={`${progress}, 100`}
+              strokeLinecap="round"
+              className="transition-all duration-300"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-sm font-medium text-gray-300">
+              {Math.round(progress)}%
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Control Button */}
       <div className="flex justify-center">
         <button
           onClick={handleStartPause}
-          className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-dark-medium hover:shadow-dark-large ${
+          className={`flex items-center space-x-2 px-7 py-3 rounded-xl font-semibold transition-all duration-200 shadow-dark-medium hover:shadow-dark-large ${
             pomodoroState.isActive
               ? 'bg-warning-500 text-white hover:bg-warning-600'
               : 'bg-success-500 text-white hover:bg-success-600'
@@ -150,12 +142,9 @@ export default function PomodoroTimer() {
         </button>
       </div>
 
-      {/* Session Info */}
-      <div className="mt-5 pt-4 border-t border-gray-700/50">
-        <div className="flex justify-between text-sm text-gray-400 font-medium">
-          <span>Current: {pomodoroState.isWorkSession ? '25 min work' : '5 min break'}</span>
-          <span>Next: {pomodoroState.isWorkSession ? '5 min break' : '25 min work'}</span>
-        </div>
+      <div className="pt-3 border-t border-gray-700/40 flex justify-between text-sm text-gray-400 font-medium">
+        <span>Current: {pomodoroState.isWorkSession ? '25 min work' : '5 min break'}</span>
+        <span>Next: {pomodoroState.isWorkSession ? '5 min break' : '25 min work'}</span>
       </div>
     </div>
   );

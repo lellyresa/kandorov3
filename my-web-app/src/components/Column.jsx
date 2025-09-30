@@ -5,7 +5,7 @@ import TaskCard from './TaskCard';
 import TaskForm from './TaskForm';
 import PomodoroTimer from './PomodoroTimer';
 import { COLUMN_TYPES } from '../types';
-import { Plus, MoreVertical, Trash2, Edit } from 'lucide-react';
+import { Plus, Trash2, Edit } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Column({ column, tasks, projectId }) {
@@ -50,12 +50,22 @@ export default function Column({ column, tasks, projectId }) {
   };
 
   return (
-    <div className="flex flex-col h-full min-w-80 max-w-80">
-      {/* Column Header */}
-      <div className={`modern-card rounded-t-xl p-4 ${
-        isActiveColumn ? 'bg-danger-500/10 border-danger-500/30' : ''
-      }`}>
-        <div className="flex items-center justify-between mb-3">
+    <div
+      className={`modern-card flex flex-col h-full min-w-80 max-w-80 overflow-hidden transition-colors duration-200 ${
+        isActiveColumn ? 'border-danger-500/40 bg-danger-500/10' : ''
+      }`}
+      style={{
+        backgroundImage: isActiveColumn
+          ? 'radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.06) 0%, transparent 55%)'
+          : 'none'
+      }}
+    >
+      <div
+        className={`p-4 border-b border-gray-700/40 ${
+          isActiveColumn ? 'bg-danger-500/10' : ''
+        }`}
+      >
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <h3 className={`font-semibold text-white ${isActiveColumn ? 'text-danger-300' : ''}`}>
               {column.title}
@@ -63,7 +73,7 @@ export default function Column({ column, tasks, projectId }) {
             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
               isActiveColumn
                 ? 'bg-danger-500/20 text-danger-300'
-                : 'bg-gray-700/50 text-gray-300'
+                : 'bg-gray-700/60 text-gray-300'
             }`}>
               {tasks.length}
             </span>
@@ -98,32 +108,25 @@ export default function Column({ column, tasks, projectId }) {
           </div>
         </div>
 
-        {/* Pomodoro Timer for Active Column */}
-        {isActiveColumn && (
-          <div className="mb-4">
-            <PomodoroTimer />
-          </div>
-        )}
-
-        {/* Column Description */}
         {column.description && (
-          <p className="text-sm text-gray-300">{column.description}</p>
+          <p className="mt-3 text-sm text-gray-300">{column.description}</p>
         )}
       </div>
 
-      {/* Tasks Container */}
+      {isActiveColumn && (
+        <div className="p-4 border-b border-gray-700/40 bg-danger-500/5">
+          <PomodoroTimer />
+        </div>
+      )}
+
       <div
         ref={setNodeRef}
-        className={`flex-1 modern-card rounded-b-xl border-t-0 p-4 min-h-96 transition-all duration-200 ${
-          isActiveColumn ? 'bg-danger-500/5 border-danger-500/20' : ''
-        } ${
-          isOver ? 'border-accent-500/30 bg-accent-500/5' : ''
+        className={`flex-1 overflow-y-auto p-4 min-h-96 transition-colors duration-200 ${
+          isOver ? 'bg-accent-500/5' : ''
         }`}
         style={{
-          backgroundImage: isActiveColumn
-            ? 'radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.03) 0%, transparent 50%)'
-            : isOver
-            ? 'radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.05) 0%, transparent 50%)'
+          backgroundImage: isOver
+            ? 'radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 60%)'
             : 'none'
         }}
       >
@@ -156,7 +159,6 @@ export default function Column({ column, tasks, projectId }) {
         </SortableContext>
       </div>
 
-      {/* Task Form Modal */}
       <TaskForm
         isOpen={showTaskForm}
         onClose={() => setShowTaskForm(false)}
