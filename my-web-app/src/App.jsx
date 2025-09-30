@@ -1,7 +1,6 @@
 import { AppProvider } from './context/AppContext';
 import KanbanBoard from './components/KanbanBoard';
 import Header from './components/Header';
-import './App.css';
 
 function App() {
   return (
