@@ -141,3 +141,11 @@ html {
 .btn-secondary {
   @apply bg-gray-800/50 hover:bg-gray-700/50 text-gray-200 border border-gray-600/50 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 hover:shadow-dark-medium;
 }
+
+/* Text utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

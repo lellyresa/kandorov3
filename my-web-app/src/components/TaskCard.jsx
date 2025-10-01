@@ -7,13 +7,11 @@ import { useApp } from '../context/AppContext';
 export default function TaskCard({
   task,
   columnId,
-  onDelete,
-  onTaskClick,
   showFocusToggle = false,
   isFocusTask = false,
   onSelectFocus = () => {}
 }) {
-  const { state } = useApp();
+  const { state, actions } = useApp();
 
   // Find the project that contains this task
   const project = state.projects.find(p =>
@@ -54,31 +52,9 @@ export default function TaskCard({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleCardClick = (e) => {
-    // Don't open modal if clicking on drag handle or focus toggle
-    if (e.target.closest('.drag-handle') || e.target.closest('.focus-toggle')) {
-      return;
-    }
-    if (onTaskClick) {
-      onTaskClick(task, columnId);
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high': return 'text-red-400';
-      case 'medium': return 'text-yellow-400';
-      case 'low': return 'text-green-400';
-      default: return 'text-gray-400';
-    }
-  };
-
-  const getPriorityIcon = (priority) => {
-    switch (priority) {
-      case 'high': return '🔴';
-      case 'medium': return '🟡';
-      case 'low': return '🟢';
-      default: return '⚪';
+  const handleCardClick = () => {
+    if (project) {
+      actions.openTaskModal(task, project.id);
     }
   };
 
@@ -101,37 +77,32 @@ export default function TaskCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`modern-card modern-card-hover group cursor-pointer ${
+      className={`modern-card modern-card-hover group cursor-pointer transition-transform hover:scale-[1.02] ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
       onClick={handleCardClick}
     >
       <div className="p-4">
-        {/* Drag Handle and Priority */}
+        {/* Drag Handle */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <div
               {...attributes}
               {...listeners}
-              className="drag-handle p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
+              className="p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
             >
               <GripVertical className="w-4 h-4" />
             </div>
-            {task.priority && (
-              <div className={`text-xs ${getPriorityColor(task.priority)}`}>
-                {getPriorityIcon(task.priority)}
-              </div>
-            )}
           </div>
 
           <div className="flex items-center space-x-2">
             {showFocusToggle && (
               <button
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Prevent opening modal when clicking focus toggle
                   onSelectFocus();
                 }}
-                className={`focus-toggle p-1 rounded-full transition-colors ${
+                className={`p-1 rounded-full transition-colors ${
                   isFocusTask
                     ? 'text-accent-200 bg-accent-500/20 hover:bg-accent-500/30'
                     : 'text-gray-500 hover:text-accent-300 hover:bg-gray-700/40'

@@ -20,6 +20,8 @@ const ACTIONS = {
   RESET_POMODORO: 'RESET_POMODORO',
   INCREMENT_WORK_TIME: 'INCREMENT_WORK_TIME',
   SET_CURRENT_TASK: 'SET_CURRENT_TASK',
+  OPEN_TASK_MODAL: 'OPEN_TASK_MODAL',
+  CLOSE_TASK_MODAL: 'CLOSE_TASK_MODAL',
 };
 
 // Initial state
@@ -32,6 +34,11 @@ const initialState = {
     currentTaskId: null,
     isWorkSession: true,
     completedPomodoros: 0,
+  },
+  taskModal: {
+    isOpen: false,
+    task: null,
+    projectId: null,
   },
 };
 
@@ -48,8 +55,6 @@ const cloneTask = (task) => {
     task.status,
     task.pomodoroCount,
     task.workSeconds ?? 0,
-    task.priority || 'medium',
-    task.dueDate || null,
     toDate(task.createdAt)
   );
   clonedTask.updatedAt = toDate(task.updatedAt ?? task.createdAt);
@@ -353,6 +358,26 @@ function appReducer(state, action) {
         },
       };
 
+    case ACTIONS.OPEN_TASK_MODAL:
+      return {
+        ...state,
+        taskModal: {
+          isOpen: true,
+          task: action.payload.task,
+          projectId: action.payload.projectId,
+        },
+      };
+
+    case ACTIONS.CLOSE_TASK_MODAL:
+      return {
+        ...state,
+        taskModal: {
+          isOpen: false,
+          task: null,
+          projectId: null,
+        },
+      };
+
     default:
       return state;
   }
@@ -367,67 +392,53 @@ export function AppProvider({ children }) {
 
   // Load data from localStorage on mount
   useEffect(() => {
-    try {
-      const savedProjects = localStorage.getItem('kandoro-projects');
-      const savedActiveProject = localStorage.getItem('kandoro-active-project');
+    const savedProjects = localStorage.getItem('kandoro-projects');
+    const savedActiveProject = localStorage.getItem('kandoro-active-project');
 
-      if (savedProjects) {
-        try {
-          const projects = JSON.parse(savedProjects).map(projectData => {
-            const project = new Project(
-              projectData.id,
-              projectData.name,
-              projectData.description
+    if (savedProjects) {
+      try {
+        const projects = JSON.parse(savedProjects).map(projectData => {
+          const project = new Project(
+            projectData.id,
+            projectData.name,
+            projectData.description
+          );
+
+          // Restore columns
+          if (projectData.columns) {
+            project.columns = projectData.columns.map(colData =>
+              new Column(colData.id, colData.title, colData.type, colData.taskIds, colData.position)
             );
-
-            // Restore columns
-            if (projectData.columns) {
-              project.columns = projectData.columns.map(colData =>
-                new Column(colData.id, colData.title, colData.type, colData.taskIds, colData.position)
-              );
-            }
-
-            // Restore tasks
-            if (projectData.tasks) {
-              project.tasks = projectData.tasks.map(taskData =>
-                new Task(
-                  taskData.id,
-                  taskData.title,
-                  taskData.description,
-                  taskData.status,
-                  taskData.pomodoroCount,
-                  taskData.workSeconds ?? 0,
-                  taskData.priority || 'medium',
-                  taskData.dueDate || null,
-                  taskData.createdAt
-                )
-              );
-            }
-
-            return project;
-          });
-
-          dispatch({ type: ACTIONS.SET_PROJECTS, payload: projects });
-
-          if (savedActiveProject) {
-            dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: savedActiveProject });
           }
-        } catch (error) {
-          console.error('Error loading saved projects:', error);
-          // If loading fails, create default project
-          const defaultProject = createDefaultProject();
-          dispatch({ type: ACTIONS.ADD_PROJECT, payload: defaultProject });
-          dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: defaultProject.id });
+
+          // Restore tasks
+          if (projectData.tasks) {
+            project.tasks = projectData.tasks.map(taskData =>
+              new Task(
+                taskData.id,
+                taskData.title,
+                taskData.description,
+                taskData.status,
+                taskData.pomodoroCount,
+                taskData.workSeconds ?? 0,
+                taskData.createdAt
+              )
+            );
+          }
+
+          return project;
+        });
+
+        dispatch({ type: ACTIONS.SET_PROJECTS, payload: projects });
+
+        if (savedActiveProject) {
+          dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: savedActiveProject });
         }
-      } else {
-        // Create default project if none exists
-        const defaultProject = createDefaultProject();
-        dispatch({ type: ACTIONS.ADD_PROJECT, payload: defaultProject });
-        dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: defaultProject.id });
+      } catch (error) {
+        console.error('Error loading saved projects:', error);
       }
-    } catch (error) {
-      console.error('Error accessing localStorage:', error);
-      // If localStorage is not available, create default project
+    } else {
+      // Create default project if none exists
       const defaultProject = createDefaultProject();
       dispatch({ type: ACTIONS.ADD_PROJECT, payload: defaultProject });
       dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: defaultProject.id });
@@ -436,15 +447,11 @@ export function AppProvider({ children }) {
 
   // Save data to localStorage whenever state changes
   useEffect(() => {
-    try {
-      if (state.projects.length > 0) {
-        localStorage.setItem('kandoro-projects', JSON.stringify(state.projects));
-      }
-      if (state.activeProjectId) {
-        localStorage.setItem('kandoro-active-project', state.activeProjectId);
-      }
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
+    if (state.projects.length > 0) {
+      localStorage.setItem('kandoro-projects', JSON.stringify(state.projects));
+    }
+    if (state.activeProjectId) {
+      localStorage.setItem('kandoro-active-project', state.activeProjectId);
     }
   }, [state.projects, state.activeProjectId]);
 
@@ -468,9 +475,9 @@ export function AppProvider({ children }) {
 
     // Add sample tasks
     const tasks = [
-      new Task('task-1', 'Set up project structure', 'Initialize the Kanban-Pomodoro app', TASK_STATUS.TODO, 0, 0, 'high', null, new Date()),
-      new Task('task-2', 'Design user interface', 'Create modern, clean UI components', TASK_STATUS.TODO, 0, 0, 'medium', null, new Date()),
-      new Task('task-3', 'Implement drag and drop', 'Add task movement functionality', TASK_STATUS.IN_PROGRESS, 0, 0, 'low', null, new Date()),
+      new Task('task-1', 'Set up project structure', 'Initialize the Kanban-Pomodoro app'),
+      new Task('task-2', 'Design user interface', 'Create modern, clean UI components'),
+      new Task('task-3', 'Implement drag and drop', 'Add task movement functionality'),
     ];
 
     tasks.forEach(task => project.addTask(task));
@@ -508,6 +515,8 @@ export function AppProvider({ children }) {
     incrementWorkTime: (projectId, taskId, seconds = 1) =>
       dispatch({ type: ACTIONS.INCREMENT_WORK_TIME, payload: { projectId, taskId, seconds } }),
     setCurrentTask: (taskId) => dispatch({ type: ACTIONS.SET_CURRENT_TASK, payload: taskId }),
+    openTaskModal: (task, projectId) => dispatch({ type: ACTIONS.OPEN_TASK_MODAL, payload: { task, projectId } }),
+    closeTaskModal: () => dispatch({ type: ACTIONS.CLOSE_TASK_MODAL }),
   };
 
   const value = {

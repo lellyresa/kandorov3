@@ -21,8 +21,8 @@ export default {
           900: '#0f172a',
           950: '#020617',
         },
-        // Dark theme background colors - using gray palette
-        gray: {
+        // Dark theme background colors
+        dark: {
           50: '#f8fafc',
           100: '#f1f5f9',
           200: '#e2e8f0',

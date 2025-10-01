@@ -4,12 +4,9 @@ import { Project, Column, COLUMN_TYPES } from '../types';
 import { X, Plus } from 'lucide-react';
 
 const generateId = (prefix) => {
-  try {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return `${prefix}-${crypto.randomUUID()}`;
-    }
-  } catch (error) {
-    // Fallback for environments where crypto is not available
+  const globalCrypto = typeof globalThis !== 'undefined' ? globalThis.crypto : undefined;
+  if (globalCrypto && typeof globalCrypto.randomUUID === 'function') {
+    return `${prefix}-${globalCrypto.randomUUID()}`;
   }
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };

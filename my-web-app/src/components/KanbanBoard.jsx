@@ -3,7 +3,6 @@ import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
 import Column from './Column';
 import ColumnForm from './ColumnForm';
 import TaskCard from './TaskCard';
-import TaskDetailModal from './TaskDetailModal';
 import { useApp } from '../context/AppContext';
 import { Plus } from 'lucide-react';
 
@@ -12,8 +11,6 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
   const activeProject = state.projects.find(p => p.id === state.activeProjectId);
   const [activeTask, setActiveTask] = useState(null);
   const [showColumnForm, setShowColumnForm] = useState(false);
-  const [modalTask, setModalTask] = useState(null);
-  const [modalProject, setModalProject] = useState(null);
 
   if (!activeProject) {
     return (
@@ -53,25 +50,6 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
     const targetColumn = activeProject.getColumnById(targetColumnId);
     if (targetColumn) {
       actions.moveTask(activeProject.id, taskId, targetColumnId);
-    }
-  };
-
-  const handleTaskClick = (task, columnId) => {
-    setModalTask(task);
-    setModalProject(activeProject);
-  };
-
-  const handleCloseModal = () => {
-    setModalTask(null);
-    setModalProject(null);
-  };
-
-  const handleDeleteTask = (taskId) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      actions.deleteTask(activeProject.id, taskId);
-      if (modalTask && modalTask.id === taskId) {
-        handleCloseModal();
-      }
     }
   };
 
@@ -118,7 +96,6 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
                   column={column}
                   tasks={tasks}
                   projectId={activeProject.id}
-                  onTaskClick={handleTaskClick}
                 />
               );
             })}
@@ -137,16 +114,6 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
         onClose={() => setShowColumnForm(false)}
         projectId={activeProject?.id}
         mode="create"
-      />
-
-      {/* Task Detail Modal */}
-      <TaskDetailModal
-        task={modalTask}
-        project={modalProject}
-        columnId={null}
-        isOpen={!!modalTask}
-        onClose={handleCloseModal}
-        onDelete={handleDeleteTask}
       />
     </div>
   );

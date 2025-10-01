@@ -8,7 +8,7 @@ import { COLUMN_TYPES } from '../types';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export default function Column({ column, tasks, projectId, onTaskClick }) {
+export default function Column({ column, tasks, projectId }) {
   const { state, actions } = useApp();
   const [showTaskForm, setShowTaskForm] = useState(false);
 
@@ -35,6 +35,12 @@ export default function Column({ column, tasks, projectId, onTaskClick }) {
   const handleDeleteColumn = () => {
     if (window.confirm(`Are you sure you want to delete the "${column.title}" column? This action cannot be undone.`)) {
       actions.deleteColumn(projectId, column.id);
+    }
+  };
+
+  const handleDeleteTask = (taskId) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      actions.deleteTask(projectId, taskId);
     }
   };
 
@@ -130,7 +136,6 @@ export default function Column({ column, tasks, projectId, onTaskClick }) {
                   task={task}
                   columnId={column.id}
                   onDelete={handleDeleteTask}
-                  onTaskClick={handleTaskClick}
                   showFocusToggle={isActiveColumn}
                   isFocusTask={isActiveColumn && currentTaskId === task.id}
                   onSelectFocus={() => handleFocusTask(task.id)}
