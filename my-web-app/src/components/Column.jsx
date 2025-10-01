@@ -3,6 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TaskCard from './TaskCard';
 import TaskForm from './TaskForm';
+import TaskDetailModal from './TaskDetailModal';
 import PomodoroTimer from './PomodoroTimer';
 import { COLUMN_TYPES } from '../types';
 import { Plus, Trash2, Edit } from 'lucide-react';
@@ -11,6 +12,8 @@ import { useApp } from '../context/AppContext';
 export default function Column({ column, tasks, projectId }) {
   const { state, actions } = useApp();
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [modalTask, setModalTask] = useState(null);
+  const [modalProject, setModalProject] = useState(null);
 
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -46,6 +49,25 @@ export default function Column({ column, tasks, projectId }) {
 
   const handleFocusTask = (taskId) => {
     actions.setCurrentTask(taskId);
+  };
+
+  const handleTaskClick = (task, project, columnId) => {
+    setModalTask(task);
+    setModalProject(project);
+  };
+
+  const handleCloseModal = () => {
+    setModalTask(null);
+    setModalProject(null);
+  };
+
+  const handleDeleteTask = (taskId) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      actions.deleteTask(projectId, taskId);
+      if (modalTask && modalTask.id === taskId) {
+        handleCloseModal();
+      }
+    }
   };
 
   return (
@@ -136,6 +158,7 @@ export default function Column({ column, tasks, projectId }) {
                   task={task}
                   columnId={column.id}
                   onDelete={handleDeleteTask}
+                  onTaskClick={handleTaskClick}
                   showFocusToggle={isActiveColumn}
                   isFocusTask={isActiveColumn && currentTaskId === task.id}
                   onSelectFocus={() => handleFocusTask(task.id)}
@@ -155,6 +178,15 @@ export default function Column({ column, tasks, projectId }) {
           mode="create"
         />
       )}
+
+      <TaskDetailModal
+        task={modalTask}
+        project={modalProject}
+        columnId={column.id}
+        isOpen={!!modalTask}
+        onClose={handleCloseModal}
+        onDelete={handleDeleteTask}
+      />
     </div>
   );
 }

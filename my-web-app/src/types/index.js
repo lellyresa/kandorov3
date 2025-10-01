@@ -25,7 +25,6 @@ export class Task {
     workSeconds = 0,
     priority = 'medium',
     dueDate = null,
-    notes = '',
     createdAt = new Date()
   ) {
     this.id = id;
@@ -36,7 +35,6 @@ export class Task {
     this.workSeconds = workSeconds;
     this.priority = priority;
     this.dueDate = dueDate;
-    this.notes = notes;
     this.createdAt = createdAt;
     this.updatedAt = new Date();
   }
@@ -57,7 +55,6 @@ export class Task {
       workSeconds: this.workSeconds,
       priority: this.priority,
       dueDate: this.dueDate,
-      notes: this.notes,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

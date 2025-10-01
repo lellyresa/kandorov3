@@ -48,6 +48,8 @@ const cloneTask = (task) => {
     task.status,
     task.pomodoroCount,
     task.workSeconds ?? 0,
+    task.priority || 'medium',
+    task.dueDate || null,
     toDate(task.createdAt)
   );
   clonedTask.updatedAt = toDate(task.updatedAt ?? task.createdAt);
@@ -394,6 +396,8 @@ export function AppProvider({ children }) {
                 taskData.status,
                 taskData.pomodoroCount,
                 taskData.workSeconds ?? 0,
+                taskData.priority || 'medium',
+                taskData.dueDate || null,
                 taskData.createdAt
               )
             );
@@ -448,9 +452,9 @@ export function AppProvider({ children }) {
 
     // Add sample tasks
     const tasks = [
-      new Task('task-1', 'Set up project structure', 'Initialize the Kanban-Pomodoro app'),
-      new Task('task-2', 'Design user interface', 'Create modern, clean UI components'),
-      new Task('task-3', 'Implement drag and drop', 'Add task movement functionality'),
+      new Task('task-1', 'Set up project structure', 'Initialize the Kanban-Pomodoro app', TASK_STATUS.TODO, 0, 0, 'high'),
+      new Task('task-2', 'Design user interface', 'Create modern, clean UI components', TASK_STATUS.TODO, 0, 0, 'medium'),
+      new Task('task-3', 'Implement drag and drop', 'Add task movement functionality', TASK_STATUS.IN_PROGRESS, 0, 0, 'low'),
     ];
 
     tasks.forEach(task => project.addTask(task));
