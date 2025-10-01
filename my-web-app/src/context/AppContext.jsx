@@ -367,55 +367,67 @@ export function AppProvider({ children }) {
 
   // Load data from localStorage on mount
   useEffect(() => {
-    const savedProjects = localStorage.getItem('kandoro-projects');
-    const savedActiveProject = localStorage.getItem('kandoro-active-project');
+    try {
+      const savedProjects = localStorage.getItem('kandoro-projects');
+      const savedActiveProject = localStorage.getItem('kandoro-active-project');
 
-    if (savedProjects) {
-      try {
-        const projects = JSON.parse(savedProjects).map(projectData => {
-          const project = new Project(
-            projectData.id,
-            projectData.name,
-            projectData.description
-          );
-
-          // Restore columns
-          if (projectData.columns) {
-            project.columns = projectData.columns.map(colData =>
-              new Column(colData.id, colData.title, colData.type, colData.taskIds, colData.position)
+      if (savedProjects) {
+        try {
+          const projects = JSON.parse(savedProjects).map(projectData => {
+            const project = new Project(
+              projectData.id,
+              projectData.name,
+              projectData.description
             );
+
+            // Restore columns
+            if (projectData.columns) {
+              project.columns = projectData.columns.map(colData =>
+                new Column(colData.id, colData.title, colData.type, colData.taskIds, colData.position)
+              );
+            }
+
+            // Restore tasks
+            if (projectData.tasks) {
+              project.tasks = projectData.tasks.map(taskData =>
+                new Task(
+                  taskData.id,
+                  taskData.title,
+                  taskData.description,
+                  taskData.status,
+                  taskData.pomodoroCount,
+                  taskData.workSeconds ?? 0,
+                  taskData.priority || 'medium',
+                  taskData.dueDate || null,
+                  taskData.createdAt
+                )
+              );
+            }
+
+            return project;
+          });
+
+          dispatch({ type: ACTIONS.SET_PROJECTS, payload: projects });
+
+          if (savedActiveProject) {
+            dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: savedActiveProject });
           }
-
-          // Restore tasks
-          if (projectData.tasks) {
-            project.tasks = projectData.tasks.map(taskData =>
-              new Task(
-                taskData.id,
-                taskData.title,
-                taskData.description,
-                taskData.status,
-                taskData.pomodoroCount,
-                taskData.workSeconds ?? 0,
-                taskData.priority || 'medium',
-                taskData.dueDate || null,
-                taskData.createdAt
-              )
-            );
-          }
-
-          return project;
-        });
-
-        dispatch({ type: ACTIONS.SET_PROJECTS, payload: projects });
-
-        if (savedActiveProject) {
-          dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: savedActiveProject });
+        } catch (error) {
+          console.error('Error loading saved projects:', error);
+          // If loading fails, create default project
+          const defaultProject = createDefaultProject();
+          dispatch({ type: ACTIONS.ADD_PROJECT, payload: defaultProject });
+          dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: defaultProject.id });
         }
-      } catch (error) {
-        console.error('Error loading saved projects:', error);
+      } else {
+        // Create default project if none exists
+        const defaultProject = createDefaultProject();
+        dispatch({ type: ACTIONS.ADD_PROJECT, payload: defaultProject });
+        dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: defaultProject.id });
       }
-    } else {
-      // Create default project if none exists
+    } catch (error) {
+      console.error('Error accessing localStorage:', error);
+      // If localStorage is not available, create default project
       const defaultProject = createDefaultProject();
       dispatch({ type: ACTIONS.ADD_PROJECT, payload: defaultProject });
       dispatch({ type: ACTIONS.SET_ACTIVE_PROJECT, payload: defaultProject.id });
@@ -424,11 +436,15 @@ export function AppProvider({ children }) {
 
   // Save data to localStorage whenever state changes
   useEffect(() => {
-    if (state.projects.length > 0) {
-      localStorage.setItem('kandoro-projects', JSON.stringify(state.projects));
-    }
-    if (state.activeProjectId) {
-      localStorage.setItem('kandoro-active-project', state.activeProjectId);
+    try {
+      if (state.projects.length > 0) {
+        localStorage.setItem('kandoro-projects', JSON.stringify(state.projects));
+      }
+      if (state.activeProjectId) {
+        localStorage.setItem('kandoro-active-project', state.activeProjectId);
+      }
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
     }
   }, [state.projects, state.activeProjectId]);
 
