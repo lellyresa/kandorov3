@@ -41,12 +41,6 @@ export default function Column({ column, tasks, projectId }) {
     }
   };
 
-  const handleDeleteTask = (taskId) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      actions.deleteTask(projectId, taskId);
-    }
-  };
-
   const handleFocusTask = (taskId) => {
     actions.setCurrentTask(taskId);
   };
