@@ -4,13 +4,48 @@ import Column from './Column';
 import ColumnForm from './ColumnForm';
 import TaskCard from './TaskCard';
 import { useApp } from '../context/AppContext';
-import { Plus } from 'lucide-react';
+import { Plus, Save, X } from 'lucide-react';
 
 export default function KanbanBoard({ onCreateProject = () => {} }) {
   const { state, actions } = useApp();
   const activeProject = state.projects.find(p => p.id === state.activeProjectId);
   const [activeTask, setActiveTask] = useState(null);
   const [showColumnForm, setShowColumnForm] = useState(false);
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [editProjectName, setEditProjectName] = useState('');
+  const [editProjectDescription, setEditProjectDescription] = useState('');
+
+  // Project editing handlers
+  const handleProjectDoubleClick = () => {
+    setEditProjectName(activeProject.name);
+    setEditProjectDescription(activeProject.description || '');
+    setIsEditingProject(true);
+  };
+
+  const handleProjectSave = () => {
+    if (editProjectName.trim() && activeProject) {
+      actions.updateProject({
+        ...activeProject,
+        name: editProjectName.trim(),
+        description: editProjectDescription.trim(),
+      });
+      setIsEditingProject(false);
+    }
+  };
+
+  const handleProjectCancel = () => {
+    setIsEditingProject(false);
+    setEditProjectName('');
+    setEditProjectDescription('');
+  };
+
+  const handleProjectKeyPress = (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      handleProjectSave();
+    } else if (e.key === 'Escape') {
+      handleProjectCancel();
+    }
+  };
 
   if (!activeProject) {
     return (
@@ -58,10 +93,55 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
       {/* Project Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-2">{activeProject.name}</h2>
-            {activeProject.description && (
-              <p className="text-gray-400 text-lg">{activeProject.description}</p>
+          <div className="flex-1">
+            {isEditingProject ? (
+              <div className="space-y-3" onKeyDown={handleProjectKeyPress}>
+                <input
+                  type="text"
+                  value={editProjectName}
+                  onChange={(e) => setEditProjectName(e.target.value)}
+                  className="w-full text-3xl font-bold bg-transparent border-none outline-none text-white placeholder-gray-500 focus:ring-0 resize-none"
+                  placeholder="Project name"
+                  autoFocus
+                />
+                <textarea
+                  value={editProjectDescription}
+                  onChange={(e) => setEditProjectDescription(e.target.value)}
+                  className="w-full text-lg bg-transparent border-none outline-none text-gray-400 placeholder-gray-500 focus:ring-0 resize-none"
+                  placeholder="Project description (optional)"
+                  rows={2}
+                />
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleProjectSave}
+                    className="flex items-center space-x-2 px-3 py-2 bg-accent-600 hover:bg-accent-700 text-white text-sm rounded-lg transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Save</span>
+                  </button>
+                  <button
+                    onClick={handleProjectCancel}
+                    className="flex items-center space-x-2 px-3 py-2 text-gray-400 hover:text-gray-300 text-sm rounded-lg transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div onDoubleClick={handleProjectDoubleClick} className="cursor-pointer group">
+                <h2 className="text-3xl font-bold text-white mb-2 group-hover:text-accent-300 transition-colors">
+                  {activeProject.name}
+                </h2>
+                {activeProject.description && (
+                  <p className="text-gray-400 text-lg group-hover:text-gray-300 transition-colors">
+                    {activeProject.description}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Double-click to edit
+                </p>
+              </div>
             )}
           </div>
 
