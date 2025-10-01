@@ -213,6 +213,16 @@ function appReducer(state, action) {
         if (task) task.update(action.payload.task);
       });
       const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
+
+      // Update the modal task if it's the same task being updated
+      let taskModal = state.taskModal;
+      if (taskModal.isOpen && taskModal.task && taskModal.task.id === action.payload.task.id) {
+        taskModal = {
+          ...taskModal,
+          task: { ...action.payload.task }, // Create new reference to trigger re-render
+        };
+      }
+
       return {
         ...state,
         projects,
@@ -220,6 +230,7 @@ function appReducer(state, action) {
           ...state.pomodoroState,
           currentTaskId,
         },
+        taskModal,
       };
     }
 
