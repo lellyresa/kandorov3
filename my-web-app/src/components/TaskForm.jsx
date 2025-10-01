@@ -1,23 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Task } from '../types';
-import { X, Plus } from 'lucide-react';
+import { Task, TASK_PRIORITY } from '../types';
+import { X, Plus, Flag, ChevronDown } from 'lucide-react';
 
 export default function TaskForm({ isOpen, onClose, projectId, columnId, task = null, mode = 'create' }) {
   const { actions } = useApp();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState(TASK_PRIORITY.MEDIUM);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
 
   useEffect(() => {
     if (task) {
       setTitle(task.title);
       setDescription(task.description || '');
+      setPriority(task.priority || TASK_PRIORITY.MEDIUM);
     } else {
       setTitle('');
       setDescription('');
+      setPriority(TASK_PRIORITY.MEDIUM);
     }
   }, [task, isOpen]);
+
+  const getPriorityStyles = (priority) => {
+    switch (priority) {
+      case TASK_PRIORITY.HIGH:
+        return {
+          icon: 'text-danger-400',
+          badge: 'bg-danger-500/20 text-danger-300 border-danger-500/30',
+          dot: 'bg-danger-400'
+        };
+      case TASK_PRIORITY.MEDIUM:
+        return {
+          icon: 'text-yellow-400',
+          badge: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+          dot: 'bg-yellow-400'
+        };
+      case TASK_PRIORITY.LOW:
+        return {
+          icon: 'text-green-400',
+          badge: 'bg-green-500/20 text-green-300 border-green-500/30',
+          dot: 'bg-green-400'
+        };
+      default:
+        return {
+          icon: 'text-gray-400',
+          badge: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+          dot: 'bg-gray-400'
+        };
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +64,11 @@ export default function TaskForm({ isOpen, onClose, projectId, columnId, task = 
         const newTask = new Task(
           `task-${Date.now()}`,
           title.trim(),
-          description.trim()
+          description.trim(),
+          'todo',
+          0,
+          0,
+          priority
         );
 
         // Add task to project
@@ -46,6 +83,7 @@ export default function TaskForm({ isOpen, onClose, projectId, columnId, task = 
           ...task,
           title: title.trim(),
           description: description.trim(),
+          priority: priority,
         });
       }
 
@@ -117,6 +155,45 @@ export default function TaskForm({ isOpen, onClose, projectId, columnId, task = 
               className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-white placeholder-gray-400 resize-none"
               placeholder="Enter task description (optional)"
             />
+          </div>
+
+          {/* Priority */}
+          <div>
+            <label htmlFor="priority" className="block text-sm font-medium text-gray-300 mb-2">
+              Priority
+            </label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                className={`w-full flex items-center justify-between px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white text-sm hover:bg-gray-800/70 transition-colors ${getPriorityStyles(priority).badge}`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Flag className={`w-4 h-4 ${getPriorityStyles(priority).icon}`} />
+                  <span className="capitalize">{priority}</span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              </button>
+
+              {showPriorityDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-600/50 rounded-lg shadow-lg z-10">
+                  {Object.values(TASK_PRIORITY).map((priorityOption) => (
+                    <button
+                      key={priorityOption}
+                      type="button"
+                      onClick={() => {
+                        setPriority(priorityOption);
+                        setShowPriorityDropdown(false);
+                      }}
+                      className={`w-full flex items-center space-x-2 px-3 py-2 text-left text-sm hover:bg-gray-700/50 transition-colors first:rounded-t-lg last:rounded-b-lg ${getPriorityStyles(priorityOption).badge}`}
+                    >
+                      <Flag className={`w-4 h-4 ${getPriorityStyles(priorityOption).icon}`} />
+                      <span className="capitalize">{priorityOption}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Footer */}

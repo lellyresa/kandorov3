@@ -14,6 +14,12 @@ export const TASK_STATUS = {
   DONE: 'done'
 };
 
+export const TASK_PRIORITY = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high'
+};
+
 // Task model
 export class Task {
   constructor(

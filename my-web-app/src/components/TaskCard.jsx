@@ -1,8 +1,9 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Clock, CheckCircle, Circle, CircleDot } from 'lucide-react';
+import { GripVertical, Clock, CheckCircle, Circle, CircleDot, Flag } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { TASK_PRIORITY } from '../types';
 
 export default function TaskCard({
   task,
@@ -55,6 +56,35 @@ export default function TaskCard({
   const handleCardClick = () => {
     if (project) {
       actions.openTaskModal(task, project.id);
+    }
+  };
+
+  const getPriorityStyles = (priority) => {
+    switch (priority) {
+      case TASK_PRIORITY.HIGH:
+        return {
+          icon: 'text-danger-400',
+          badge: 'bg-danger-500/20 text-danger-300 border-danger-500/30',
+          dot: 'bg-danger-400'
+        };
+      case TASK_PRIORITY.MEDIUM:
+        return {
+          icon: 'text-yellow-400',
+          badge: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+          dot: 'bg-yellow-400'
+        };
+      case TASK_PRIORITY.LOW:
+        return {
+          icon: 'text-green-400',
+          badge: 'bg-green-500/20 text-green-300 border-green-500/30',
+          dot: 'bg-green-400'
+        };
+      default:
+        return {
+          icon: 'text-gray-400',
+          badge: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+          dot: 'bg-gray-400'
+        };
     }
   };
 
@@ -116,14 +146,23 @@ export default function TaskCard({
                 )}
               </button>
             )}
-            <div
-              className={`px-2 py-1 rounded-lg text-xs font-mono ${
-                isFocusTask
-                  ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
-                  : 'bg-gray-800/60 text-gray-300'
-              }`}
-            >
-              {formatWorkTime(task.workSeconds)}
+            <div className="flex items-center space-x-2">
+              {/* Priority Indicator */}
+              <div className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs ${getPriorityStyles(task.priority).badge}`}>
+                <Flag className={`w-3 h-3 ${getPriorityStyles(task.priority).icon}`} />
+                <span className="capitalize font-medium">{task.priority}</span>
+              </div>
+
+              {/* Time Tracking */}
+              <div
+                className={`px-2 py-1 rounded-lg text-xs font-mono ${
+                  isFocusTask
+                    ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
+                    : 'bg-gray-800/60 text-gray-300'
+                }`}
+              >
+                {formatWorkTime(task.workSeconds)}
+              </div>
             </div>
           </div>
         </div>

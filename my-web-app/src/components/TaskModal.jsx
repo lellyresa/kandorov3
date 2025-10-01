@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Clock, CheckCircle, Circle, CircleDot, Edit, Save, Calendar } from 'lucide-react';
+import { X, Trash2, Clock, CheckCircle, Circle, CircleDot, Edit, Save, Calendar, Flag, ChevronDown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { TASK_PRIORITY } from '../types';
 
 export default function TaskModal() {
   const { state, actions } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editPriority, setEditPriority] = useState(TASK_PRIORITY.MEDIUM);
+  const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
 
   const { isOpen, task, projectId } = state.taskModal;
 
@@ -14,8 +17,38 @@ export default function TaskModal() {
     if (task) {
       setEditTitle(task.title);
       setEditDescription(task.description);
+      setEditPriority(task.priority || TASK_PRIORITY.MEDIUM);
     }
   }, [task]);
+
+  const getPriorityStyles = (priority) => {
+    switch (priority) {
+      case TASK_PRIORITY.HIGH:
+        return {
+          icon: 'text-danger-400',
+          badge: 'bg-danger-500/20 text-danger-300 border-danger-500/30',
+          dot: 'bg-danger-400'
+        };
+      case TASK_PRIORITY.MEDIUM:
+        return {
+          icon: 'text-yellow-400',
+          badge: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+          dot: 'bg-yellow-400'
+        };
+      case TASK_PRIORITY.LOW:
+        return {
+          icon: 'text-green-400',
+          badge: 'bg-green-500/20 text-green-300 border-green-500/30',
+          dot: 'bg-green-400'
+        };
+      default:
+        return {
+          icon: 'text-gray-400',
+          badge: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+          dot: 'bg-gray-400'
+        };
+    }
+  };
 
   const handleClose = () => {
     actions.closeTaskModal();
@@ -28,6 +61,7 @@ export default function TaskModal() {
         ...task,
         title: editTitle.trim(),
         description: editDescription.trim(),
+        priority: editPriority,
       });
       setIsEditing(false);
     }
@@ -182,9 +216,45 @@ export default function TaskModal() {
               {/* Priority */}
               <div className="space-y-2">
                 <div className="text-sm text-gray-400">Priority</div>
-                <div className="px-3 py-2 bg-gray-800/50 rounded-lg text-white text-sm capitalize">
-                  {task.priority || 'Medium'}
-                </div>
+                {isEditing ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                      className={`w-full flex items-center justify-between px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white text-sm hover:bg-gray-800/70 transition-colors ${getPriorityStyles(editPriority).badge}`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Flag className={`w-4 h-4 ${getPriorityStyles(editPriority).icon}`} />
+                        <span className="capitalize">{editPriority}</span>
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </button>
+
+                    {showPriorityDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-600/50 rounded-lg shadow-lg z-10">
+                        {Object.values(TASK_PRIORITY).map((priority) => (
+                          <button
+                            key={priority}
+                            onClick={() => {
+                              setEditPriority(priority);
+                              setShowPriorityDropdown(false);
+                            }}
+                            className={`w-full flex items-center space-x-2 px-3 py-2 text-left text-sm hover:bg-gray-700/50 transition-colors first:rounded-t-lg last:rounded-b-lg ${getPriorityStyles(priority).badge}`}
+                          >
+                            <Flag className={`w-4 h-4 ${getPriorityStyles(priority).icon}`} />
+                            <span className="capitalize">{priority}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className={`px-3 py-2 bg-gray-800/50 rounded-lg text-white text-sm ${getPriorityStyles(task.priority).badge}`}>
+                    <div className="flex items-center space-x-2">
+                      <Flag className={`w-4 h-4 ${getPriorityStyles(task.priority).icon}`} />
+                      <span className="capitalize font-medium">{task.priority}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
