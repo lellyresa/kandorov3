@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Edit, Trash2, Clock, CheckCircle, Circle, CircleDot } from 'lucide-react';
+import { GripVertical, Clock, CheckCircle, Circle, CircleDot } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import TaskModal from './TaskModal';
 
 export default function TaskCard({
   task,
@@ -12,15 +13,15 @@ export default function TaskCard({
   isFocusTask = false,
   onSelectFocus = () => {}
 }) {
-  const { state, actions } = useApp();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(task.title);
-  const [editDescription, setEditDescription] = useState(task.description);
+  const { state } = useApp();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Find the project that contains this task
+  // Find the project and column that contains this task
   const project = state.projects.find(p =>
     p.tasks.some(t => t.id === task.id)
   );
+
+  const column = project?.columns.find(c => c.id === columnId);
 
   const {
     attributes,
@@ -56,25 +57,24 @@ export default function TaskCard({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSave = () => {
-    if (editTitle.trim() && project) {
-      actions.updateTask(project.id, {
-        ...task,
-        title: editTitle.trim(),
-        description: editDescription.trim(),
-      });
-      setIsEditing(false);
-    }
+  const priorityColors = {
+    low: 'bg-green-500/20 text-green-300 border-green-500/40',
+    medium: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40',
+    high: 'bg-red-500/20 text-red-300 border-red-500/40',
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSave();
-    } else if (e.key === 'Escape') {
-      setEditTitle(task.title);
-      setEditDescription(task.description);
-      setIsEditing(false);
+  const priorityLabels = {
+    low: 'LOW',
+    medium: 'MEDIUM',
+    high: 'HIGH',
+  };
+
+  const handleCardClick = (e) => {
+    // Don't open modal if clicking on drag handle or focus toggle
+    if (e.target.closest('.drag-handle') || e.target.closest('.focus-toggle')) {
+      return;
     }
+    setIsModalOpen(true);
   };
 
   if (isDragging) {
@@ -93,108 +93,65 @@ export default function TaskCard({
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`modern-card modern-card-hover group cursor-pointer ${
-        isFocusTask ? 'ring-2 ring-accent-500/40' : ''
-      }`}
-    >
-      <div className="p-4">
-        {/* Drag Handle */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div
-              {...attributes}
-              {...listeners}
-              className="p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
-            >
-              <GripVertical className="w-4 h-4" />
+    <>
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`modern-card modern-card-hover cursor-pointer ${
+          isFocusTask ? 'ring-2 ring-accent-500/40' : ''
+        }`}
+        onClick={handleCardClick}
+      >
+        <div className="p-4">
+          {/* Drag Handle and Priority Badge */}
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div
+                {...attributes}
+                {...listeners}
+                className="drag-handle p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
+              >
+                <GripVertical className="w-4 h-4" />
+              </div>
+              <div className={`px-2 py-1 rounded-lg text-xs font-mono border ${priorityColors[task.priority || 'medium']}`}>
+                {priorityLabels[task.priority || 'medium']}
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center space-x-2">
-            {showFocusToggle && (
-              <button
-                onClick={onSelectFocus}
-                className={`p-1 rounded-full transition-colors ${
-                  isFocusTask
-                    ? 'text-accent-200 bg-accent-500/20 hover:bg-accent-500/30'
-                    : 'text-gray-500 hover:text-accent-300 hover:bg-gray-700/40'
-                }`}
-                title={isFocusTask ? 'Currently focused task' : 'Set as focused task'}
-              >
-                {isFocusTask ? (
-                  <CircleDot className="w-4 h-4" />
-                ) : (
-                  <Circle className="w-4 h-4" />
-                )}
-              </button>
-            )}
-            <div
-              className={`px-2 py-1 rounded-lg text-xs font-mono ${
-                isFocusTask
-                  ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
-                  : 'bg-gray-800/60 text-gray-300'
-              }`}
-            >
-              {formatWorkTime(task.workSeconds)}
-            </div>
-            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-1 text-gray-400 hover:text-accent-400 rounded hover:bg-gray-700/50 transition-colors"
-                title="Edit task"
-              >
-                <Edit className="w-3 h-3" />
-              </button>
-              <button
-                onClick={() => onDelete && onDelete(task.id)}
-                className="p-1 text-gray-400 hover:text-danger-400 rounded hover:bg-gray-700/50 transition-colors"
-                title="Delete task"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Task Content */}
-        {isEditing ? (
-          <div className="space-y-3">
-            <input
-              type="text"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="w-full px-3 py-2 text-sm bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-white placeholder-gray-400"
-              placeholder="Task title"
-              autoFocus
-            />
-            <textarea
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="w-full px-3 py-2 text-sm bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-white placeholder-gray-400 resize-none"
-              placeholder="Task description (optional)"
-              rows={2}
-            />
             <div className="flex items-center space-x-2">
-              <button
-                onClick={handleSave}
-                className="px-3 py-2 text-xs bg-accent-600 hover:bg-accent-700 text-white rounded-lg transition-colors font-medium"
+              {showFocusToggle && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectFocus();
+                  }}
+                  className={`focus-toggle p-1 rounded-full transition-colors ${
+                    isFocusTask
+                      ? 'text-accent-200 bg-accent-500/20 hover:bg-accent-500/30'
+                      : 'text-gray-500 hover:text-accent-300 hover:bg-gray-700/40'
+                  }`}
+                  title={isFocusTask ? 'Currently focused task' : 'Set as focused task'}
+                >
+                  {isFocusTask ? (
+                    <CircleDot className="w-4 h-4" />
+                  ) : (
+                    <Circle className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+              <div
+                className={`px-2 py-1 rounded-lg text-xs font-mono ${
+                  isFocusTask
+                    ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
+                    : 'bg-gray-800/60 text-gray-300'
+                }`}
               >
-                Save
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-3 py-2 text-xs text-gray-400 hover:text-gray-300 transition-colors font-medium"
-              >
-                Cancel
-              </button>
+                {formatWorkTime(task.workSeconds)}
+              </div>
             </div>
           </div>
-        ) : (
+
+          {/* Task Content */}
           <div>
             <h4 className="font-medium text-white mb-2 leading-tight">
               {task.title}
@@ -203,6 +160,26 @@ export default function TaskCard({
               <p className="text-sm text-gray-300 mb-3 leading-relaxed">
                 {task.description}
               </p>
+            )}
+
+            {/* Due Date */}
+            {task.dueDate && (
+              <div className="mb-3">
+                <div className="text-xs text-gray-400 mb-1">DUE</div>
+                <div className="text-sm text-gray-300">
+                  {new Date(task.dueDate).toLocaleDateString()}
+                </div>
+              </div>
+            )}
+
+            {/* Notes Preview */}
+            {task.notes && (
+              <div className="mb-3">
+                <div className="text-xs text-gray-400 mb-1">NOTES</div>
+                <div className="text-sm text-gray-300 bg-gray-800/30 rounded-lg p-2 max-h-16 overflow-hidden">
+                  {task.notes.length > 100 ? `${task.notes.substring(0, 100)}...` : task.notes}
+                </div>
+              </div>
             )}
 
             {/* Task Metadata */}
@@ -227,8 +204,18 @@ export default function TaskCard({
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
-    </div>
+
+      {/* Task Modal */}
+      <TaskModal
+        task={task}
+        project={project}
+        column={column}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onDelete={onDelete}
+      />
+    </>
   );
 }
