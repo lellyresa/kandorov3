@@ -23,6 +23,7 @@ export class Task {
     status = TASK_STATUS.TODO,
     pomodoroCount = 0,
     workSeconds = 0,
+    priority = 'medium',
     createdAt = new Date()
   ) {
     this.id = id;
@@ -31,6 +32,7 @@ export class Task {
     this.status = status;
     this.pomodoroCount = pomodoroCount;
     this.workSeconds = workSeconds;
+    this.priority = priority;
     this.createdAt = createdAt;
     this.updatedAt = new Date();
   }
@@ -49,6 +51,7 @@ export class Task {
       status: this.status,
       pomodoroCount: this.pomodoroCount,
       workSeconds: this.workSeconds,
+      priority: this.priority,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
@@ -171,4 +174,3 @@ export class Project {
     };
   }
 }
-
