@@ -12,7 +12,7 @@ function App() {
 
   return (
     <AppProvider>
-      <div className="min-h-screen bg-dark-900 flex">
+      <div className="min-h-screen bg-gray-900 flex">
         <Sidebar onCreateProject={openProjectForm} />
         <main className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto">

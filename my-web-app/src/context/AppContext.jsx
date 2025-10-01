@@ -452,9 +452,9 @@ export function AppProvider({ children }) {
 
     // Add sample tasks
     const tasks = [
-      new Task('task-1', 'Set up project structure', 'Initialize the Kanban-Pomodoro app', TASK_STATUS.TODO, 0, 0, 'high'),
-      new Task('task-2', 'Design user interface', 'Create modern, clean UI components', TASK_STATUS.TODO, 0, 0, 'medium'),
-      new Task('task-3', 'Implement drag and drop', 'Add task movement functionality', TASK_STATUS.IN_PROGRESS, 0, 0, 'low'),
+      new Task('task-1', 'Set up project structure', 'Initialize the Kanban-Pomodoro app', TASK_STATUS.TODO, 0, 0, 'high', null, new Date()),
+      new Task('task-2', 'Design user interface', 'Create modern, clean UI components', TASK_STATUS.TODO, 0, 0, 'medium', null, new Date()),
+      new Task('task-3', 'Implement drag and drop', 'Add task movement functionality', TASK_STATUS.IN_PROGRESS, 0, 0, 'low', null, new Date()),
     ];
 
     tasks.forEach(task => project.addTask(task));
