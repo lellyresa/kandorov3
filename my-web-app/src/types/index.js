@@ -24,6 +24,7 @@ export class Task {
     pomodoroCount = 0,
     workSeconds = 0,
     priority = 'medium',
+    dueDate = null,
     createdAt = new Date()
   ) {
     this.id = id;
@@ -33,6 +34,7 @@ export class Task {
     this.pomodoroCount = pomodoroCount;
     this.workSeconds = workSeconds;
     this.priority = priority;
+    this.dueDate = dueDate;
     this.createdAt = createdAt;
     this.updatedAt = new Date();
   }
@@ -52,6 +54,7 @@ export class Task {
       pomodoroCount: this.pomodoroCount,
       workSeconds: this.workSeconds,
       priority: this.priority,
+      dueDate: this.dueDate,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

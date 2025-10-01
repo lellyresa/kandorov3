@@ -2,11 +2,122 @@ import React, { useState, useEffect } from 'react';
 import { X, Trash2, Clock, CheckCircle, Circle, CircleDot, Edit, Save, Calendar } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
+function DatePicker({ value, onChange, onClose }) {
+  const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : new Date());
+
+  const handleDateClick = (date) => {
+    setSelectedDate(date);
+    onChange(date.toISOString());
+    onClose();
+  };
+
+  // Generate calendar days for current month
+  const generateCalendarDays = () => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      days.push(date);
+    }
+
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays();
+
+  return (
+    <div className="absolute top-full left-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 min-w-[280px]">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => {
+            const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1);
+            setSelectedDate(newDate);
+          }}
+          className="p-1 text-gray-400 hover:text-white"
+        >
+          ‹
+        </button>
+        <div className="text-white font-medium">
+          {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        </div>
+        <button
+          onClick={() => {
+            const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
+            setSelectedDate(newDate);
+          }}
+          className="p-1 text-gray-400 hover:text-white"
+        >
+          ›
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+          <div key={day} className="text-center text-xs text-gray-400 py-1">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {calendarDays.map((date, index) => (
+          <button
+            key={index}
+            onClick={() => date && handleDateClick(date)}
+            className={`text-center py-2 text-sm rounded hover:bg-gray-700 ${
+              date
+                ? date.toDateString() === selectedDate.toDateString()
+                  ? 'bg-accent-600 text-white'
+                  : 'text-gray-300 hover:text-white'
+                : ''
+            }`}
+            disabled={!date}
+          >
+            {date ? date.getDate() : ''}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex justify-end mt-4 space-x-2">
+        <button
+          onClick={() => {
+            onChange(null);
+            onClose();
+          }}
+          className="px-3 py-1 text-xs text-gray-400 hover:text-white"
+        >
+          Clear
+        </button>
+        <button
+          onClick={onClose}
+          className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function TaskModal() {
   const { state, actions } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const { isOpen, task, projectId } = state.taskModal;
 
@@ -20,6 +131,7 @@ export default function TaskModal() {
   const handleClose = () => {
     actions.closeTaskModal();
     setIsEditing(false);
+    setShowDatePicker(false);
   };
 
   const handleSave = () => {
@@ -44,7 +156,9 @@ export default function TaskModal() {
     if (e.key === 'Enter' && e.ctrlKey) {
       handleSave();
     } else if (e.key === 'Escape') {
-      if (isEditing) {
+      if (showDatePicker) {
+        setShowDatePicker(false);
+      } else if (isEditing) {
         setEditTitle(task.title);
         setEditDescription(task.description);
         setIsEditing(false);
@@ -58,6 +172,7 @@ export default function TaskModal() {
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       handleClose();
+      setShowDatePicker(false);
     }
   };
 
@@ -186,10 +301,27 @@ export default function TaskModal() {
           {/* Due Date */}
           <div className="space-y-2">
             <div className="text-sm text-gray-400 uppercase tracking-wide">Due Date</div>
-            <div className="bg-gray-800/30 rounded-lg px-4 py-3">
-              <p className="text-white text-sm">
-                {formatDueDate(task.dueDate)}
-              </p>
+            <div className="relative">
+              <button
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="w-full bg-gray-800/30 rounded-lg px-4 py-3 text-left hover:bg-gray-800/50 transition-colors"
+              >
+                <p className="text-white text-sm">
+                  {formatDueDate(task.dueDate)}
+                </p>
+              </button>
+              {showDatePicker && (
+                <DatePicker
+                  value={task.dueDate}
+                  onChange={(newDate) => {
+                    actions.updateTask(projectId, {
+                      ...task,
+                      dueDate: newDate,
+                    });
+                  }}
+                  onClose={() => setShowDatePicker(false)}
+                />
+              )}
             </div>
           </div>
 
@@ -206,12 +338,10 @@ export default function TaskModal() {
                       : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50'
                   }`}
                   onClick={() => {
-                    if (isEditing) {
-                      actions.updateTask(projectId, {
-                        ...task,
-                        priority: priority,
-                      });
-                    }
+                    actions.updateTask(projectId, {
+                      ...task,
+                      priority: priority,
+                    });
                   }}
                 >
                   {priority.toUpperCase()}
