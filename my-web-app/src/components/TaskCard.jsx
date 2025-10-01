@@ -60,7 +60,7 @@ export default function TaskCard({
       return;
     }
     if (onTaskClick) {
-      onTaskClick(task, project, columnId);
+      onTaskClick(task, columnId);
     }
   };
 
