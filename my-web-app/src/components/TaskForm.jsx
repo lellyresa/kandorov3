@@ -4,7 +4,7 @@ import { Task } from '../types';
 import { X, Plus } from 'lucide-react';
 
 export default function TaskForm({ isOpen, onClose, projectId, columnId, task = null, mode = 'create' }) {
-  const { state, actions } = useApp();
+  const { actions } = useApp();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,9 +38,8 @@ export default function TaskForm({ isOpen, onClose, projectId, columnId, task = 
         actions.addTask(projectId, newTask);
 
         // Add task to the specified column
-        const project = state.projects.find(p => p.id === projectId);
-        if (project && columnId) {
-          project.moveTaskToColumn(newTask.id, columnId);
+        if (columnId) {
+          actions.moveTask(projectId, newTask.id, columnId);
         }
       } else if (mode === 'edit' && task) {
         actions.updateTask(projectId, {

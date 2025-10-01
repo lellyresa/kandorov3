@@ -8,14 +8,25 @@ export default function ColumnForm({ isOpen, onClose, projectId, column = null, 
   const [title, setTitle] = useState('');
   const [type, setType] = useState(COLUMN_TYPES.TODO);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const generateColumnId = () => {
+    const globalCrypto = typeof globalThis !== 'undefined' ? globalThis.crypto : undefined;
+    if (globalCrypto && typeof globalCrypto.randomUUID === 'function') {
+      return `column-${globalCrypto.randomUUID()}`;
+    }
+    return `column-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  };
 
   useEffect(() => {
     if (column) {
       setTitle(column.title);
       setType(column.type);
+      setError('');
     } else {
       setTitle('');
       setType(COLUMN_TYPES.TODO);
+      setError('');
     }
   }, [column, isOpen]);
 
@@ -24,12 +35,32 @@ export default function ColumnForm({ isOpen, onClose, projectId, column = null, 
 
     if (!title.trim()) return;
 
+    const project = state.projects.find(p => p.id === projectId);
+    if (!project) {
+      setError('Select or create a project before adding columns.');
+      return;
+    }
+
+    if (mode === 'create' && type === COLUMN_TYPES.ACTIVE) {
+      setError('The active column already exists for each project.');
+      return;
+    }
+
+    const normalizedTitle = title.trim().toLowerCase();
+    if (
+      mode === 'create' &&
+      project.columns.some(col => col.title.trim().toLowerCase() === normalizedTitle)
+    ) {
+      setError('A column with this name already exists.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       if (mode === 'create') {
         const newColumn = new Column(
-          `column-${Date.now()}`,
+          generateColumnId(),
           title.trim(),
           type,
           [],
@@ -43,10 +74,10 @@ export default function ColumnForm({ isOpen, onClose, projectId, column = null, 
           type,
         });
       }
-
       onClose();
     } catch (error) {
       console.error('Error saving column:', error);
+      setError('Something went wrong while saving. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -104,6 +135,12 @@ export default function ColumnForm({ isOpen, onClose, projectId, column = null, 
               autoFocus
             />
           </div>
+
+          {error && (
+            <div className="text-sm text-danger-400 bg-danger-500/10 border border-danger-500/20 rounded-lg px-3 py-2">
+              {error}
+            </div>
+          )}
 
           {/* Column Type */}
           <div>
@@ -165,4 +202,3 @@ export default function ColumnForm({ isOpen, onClose, projectId, column = null, 
     </div>
   );
 }
-

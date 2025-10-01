@@ -6,7 +6,7 @@ import TaskCard from './TaskCard';
 import { useApp } from '../context/AppContext';
 import { Plus } from 'lucide-react';
 
-export default function KanbanBoard() {
+export default function KanbanBoard({ onCreateProject = () => {} }) {
   const { state, actions } = useApp();
   const activeProject = state.projects.find(p => p.id === state.activeProjectId);
   const [activeTask, setActiveTask] = useState(null);
@@ -21,7 +21,7 @@ export default function KanbanBoard() {
           </div>
           <h2 className="text-2xl font-semibold text-white mb-3">No Project Selected</h2>
           <p className="text-gray-400 mb-6">Create or select a project to get started with your tasks.</p>
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={onCreateProject}>
             <Plus className="w-4 h-4 mr-2" />
             Create Project
           </button>
@@ -51,21 +51,6 @@ export default function KanbanBoard() {
     if (targetColumn) {
       actions.moveTask(activeProject.id, taskId, targetColumnId);
     }
-  };
-
-  const handleAddTask = (columnId) => {
-    // TODO: Open task creation modal
-    console.log('Add task to column:', columnId);
-  };
-
-  const handleEditColumn = (column) => {
-    // TODO: Open column edit modal
-    console.log('Edit column:', column);
-  };
-
-  const handleDeleteColumn = (columnId) => {
-    // TODO: Confirm and delete column
-    console.log('Delete column:', columnId);
   };
 
   return (

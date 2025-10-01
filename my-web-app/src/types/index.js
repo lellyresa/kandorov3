@@ -16,12 +16,21 @@ export const TASK_STATUS = {
 
 // Task model
 export class Task {
-  constructor(id, title, description = '', status = TASK_STATUS.TODO, pomodoroCount = 0, createdAt = new Date()) {
+  constructor(
+    id,
+    title,
+    description = '',
+    status = TASK_STATUS.TODO,
+    pomodoroCount = 0,
+    workSeconds = 0,
+    createdAt = new Date()
+  ) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.status = status;
     this.pomodoroCount = pomodoroCount;
+    this.workSeconds = workSeconds;
     this.createdAt = createdAt;
     this.updatedAt = new Date();
   }
@@ -39,6 +48,7 @@ export class Task {
       description: this.description,
       status: this.status,
       pomodoroCount: this.pomodoroCount,
+      workSeconds: this.workSeconds,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
@@ -161,5 +171,4 @@ export class Project {
     };
   }
 }
-
 

@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Plus, Settings, Timer } from 'lucide-react';
 
 export default function Header() {
-  const { state, actions } = useApp();
+  const { state } = useApp();
   const activeProject = state.projects.find(p => p.id === state.activeProjectId);
 
   return (

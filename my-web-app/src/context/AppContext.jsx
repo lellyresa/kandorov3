@@ -18,6 +18,8 @@ const ACTIONS = {
   SET_POMODORO_STATE: 'SET_POMODORO_STATE',
   UPDATE_POMODORO_TIME: 'UPDATE_POMODORO_TIME',
   RESET_POMODORO: 'RESET_POMODORO',
+  INCREMENT_WORK_TIME: 'INCREMENT_WORK_TIME',
+  SET_CURRENT_TASK: 'SET_CURRENT_TASK',
 };
 
 // Initial state
@@ -33,124 +35,291 @@ const initialState = {
   },
 };
 
+const toDate = (value) => {
+  if (!value) return new Date();
+  return value instanceof Date ? new Date(value.getTime()) : new Date(value);
+};
+
+const cloneTask = (task) => {
+  const clonedTask = new Task(
+    task.id,
+    task.title,
+    task.description,
+    task.status,
+    task.pomodoroCount,
+    task.workSeconds ?? 0,
+    toDate(task.createdAt)
+  );
+  clonedTask.updatedAt = toDate(task.updatedAt ?? task.createdAt);
+  return clonedTask;
+};
+
+const cloneColumn = (column) => {
+  const clonedColumn = new Column(
+    column.id,
+    column.title,
+    column.type,
+    Array.isArray(column.taskIds) ? [...column.taskIds] : [],
+    column.position
+  );
+  clonedColumn.createdAt = toDate(column.createdAt);
+  return clonedColumn;
+};
+
+const cloneProject = (project) => {
+  const clonedProject = new Project(
+    project.id,
+    project.name,
+    project.description,
+    project.columns.map(cloneColumn),
+    project.tasks.map(cloneTask)
+  );
+  clonedProject.createdAt = toDate(project.createdAt);
+  clonedProject.updatedAt = toDate(project.updatedAt);
+  return clonedProject;
+};
+
+const updateProjects = (projects, projectId, updater) =>
+  projects.map((project) => {
+    if (project.id !== projectId) return project;
+    const clonedProject = cloneProject(project);
+    updater(clonedProject);
+    clonedProject.updatedAt = new Date();
+    return clonedProject;
+  });
+
+const resolveCurrentTaskId = (projects, preferredTaskId, activeProjectId) => {
+  if (!activeProjectId) return null;
+  const project = projects.find((p) => p.id === activeProjectId);
+  if (!project) return null;
+
+  const activeColumn = project.columns.find((column) => column.type === COLUMN_TYPES.ACTIVE);
+  if (!activeColumn) return null;
+
+  const hasTask = (taskId) => taskId && activeColumn.taskIds.includes(taskId);
+
+  if (hasTask(preferredTaskId)) {
+    return preferredTaskId;
+  }
+
+  return activeColumn.taskIds[0] ?? null;
+};
+
 // Reducer function
 function appReducer(state, action) {
   switch (action.type) {
-    case ACTIONS.SET_PROJECTS:
-      return { ...state, projects: action.payload };
-
-    case ACTIONS.ADD_PROJECT:
-      return { ...state, projects: [...state.projects, action.payload] };
-
-    case ACTIONS.UPDATE_PROJECT:
+    case ACTIONS.SET_PROJECTS: {
+      const projects = action.payload;
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
       return {
         ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.id ? project.update(action.payload) : project
-        ),
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.ADD_PROJECT: {
+      const projects = [...state.projects, action.payload];
+      const activeProjectId = state.activeProjectId ?? action.payload.id;
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, activeProjectId);
+      return {
+        ...state,
+        projects,
+        activeProjectId,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.UPDATE_PROJECT: {
+      const projects = state.projects.map((project) => {
+        if (project.id !== action.payload.id) return project;
+        const updatedProject = cloneProject(project);
+        updatedProject.update(action.payload);
+        return updatedProject;
+      });
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.DELETE_PROJECT: {
+      const projects = state.projects.filter(project => project.id !== action.payload);
+      const activeProjectId =
+        state.activeProjectId === action.payload
+          ? projects[0]?.id ?? null
+          : state.activeProjectId;
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, activeProjectId);
+      return {
+        ...state,
+        projects,
+        activeProjectId,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.SET_ACTIVE_PROJECT: {
+      const activeProjectId = action.payload;
+      const currentTaskId = resolveCurrentTaskId(state.projects, null, activeProjectId);
+      return {
+        ...state,
+        activeProjectId,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.ADD_TASK: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        project.addTask(action.payload.task);
+      });
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.UPDATE_TASK: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        const task = project.getTaskById(action.payload.task.id);
+        if (task) task.update(action.payload.task);
+      });
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.DELETE_TASK: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        project.removeTask(action.payload.taskId);
+      });
+      const currentTaskId = resolveCurrentTaskId(
+        projects,
+        state.pomodoroState.currentTaskId === action.payload.taskId ? null : state.pomodoroState.currentTaskId,
+        state.activeProjectId
+      );
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.MOVE_TASK: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        project.moveTaskToColumn(action.payload.taskId, action.payload.targetColumnId);
+      });
+      const currentTaskId = resolveCurrentTaskId(
+        projects,
+        state.pomodoroState.currentTaskId,
+        state.activeProjectId
+      );
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.ADD_COLUMN: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        if (!project.getColumnById(action.payload.column.id)) {
+          project.addColumn(action.payload.column);
+        }
+      });
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.UPDATE_COLUMN: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        const column = project.getColumnById(action.payload.column.id);
+        if (column) column.update(action.payload.column);
+      });
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.DELETE_COLUMN: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        project.removeColumn(action.payload.columnId);
+      });
+      const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
+      return {
+        ...state,
+        projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
+      };
+    }
+
+    case ACTIONS.INCREMENT_WORK_TIME:
+      return {
+        ...state,
+        projects: updateProjects(state.projects, action.payload.projectId, (project) => {
+          const task = project.getTaskById(action.payload.taskId);
+          if (task) {
+            task.workSeconds = (task.workSeconds ?? 0) + action.payload.seconds;
+          }
+        }),
       };
 
-    case ACTIONS.DELETE_PROJECT:
+    case ACTIONS.SET_CURRENT_TASK:
       return {
         ...state,
-        projects: state.projects.filter(project => project.id !== action.payload),
-        activeProjectId: state.activeProjectId === action.payload ? null : state.activeProjectId,
-      };
-
-    case ACTIONS.SET_ACTIVE_PROJECT:
-      return { ...state, activeProjectId: action.payload };
-
-    case ACTIONS.ADD_TASK:
-      return {
-        ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.projectId
-            ? (() => {
-                project.addTask(action.payload.task);
-                return project;
-              })()
-            : project
-        ),
-      };
-
-    case ACTIONS.UPDATE_TASK:
-      return {
-        ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.projectId
-            ? (() => {
-                const task = project.getTaskById(action.payload.task.id);
-                if (task) task.update(action.payload.task);
-                return project;
-              })()
-            : project
-        ),
-      };
-
-    case ACTIONS.DELETE_TASK:
-      return {
-        ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.projectId
-            ? (() => {
-                project.removeTask(action.payload.taskId);
-                return project;
-              })()
-            : project
-        ),
-      };
-
-    case ACTIONS.MOVE_TASK:
-      return {
-        ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.projectId
-            ? (() => {
-                project.moveTaskToColumn(action.payload.taskId, action.payload.targetColumnId);
-                return project;
-              })()
-            : project
-        ),
-      };
-
-    case ACTIONS.ADD_COLUMN:
-      return {
-        ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.projectId
-            ? (() => {
-                project.addColumn(action.payload.column);
-                return project;
-              })()
-            : project
-        ),
-      };
-
-    case ACTIONS.UPDATE_COLUMN:
-      return {
-        ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.projectId
-            ? (() => {
-                const column = project.getColumnById(action.payload.column.id);
-                if (column) column.update(action.payload.column);
-                return project;
-              })()
-            : project
-        ),
-      };
-
-    case ACTIONS.DELETE_COLUMN:
-      return {
-        ...state,
-        projects: state.projects.map(project =>
-          project.id === action.payload.projectId
-            ? (() => {
-                project.removeColumn(action.payload.columnId);
-                return project;
-              })()
-            : project
-        ),
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId: action.payload,
+        },
       };
 
     case ACTIONS.SET_POMODORO_STATE:
@@ -218,7 +387,15 @@ export function AppProvider({ children }) {
           // Restore tasks
           if (projectData.tasks) {
             project.tasks = projectData.tasks.map(taskData =>
-              new Task(taskData.id, taskData.title, taskData.description, taskData.status, taskData.pomodoroCount)
+              new Task(
+                taskData.id,
+                taskData.title,
+                taskData.description,
+                taskData.status,
+                taskData.pomodoroCount,
+                taskData.workSeconds ?? 0,
+                taskData.createdAt
+              )
             );
           }
 
@@ -308,6 +485,9 @@ export function AppProvider({ children }) {
     setPomodoroState: (pomodoroState) => dispatch({ type: ACTIONS.SET_POMODORO_STATE, payload: pomodoroState }),
     updatePomodoroTime: (timeRemaining) => dispatch({ type: ACTIONS.UPDATE_POMODORO_TIME, payload: timeRemaining }),
     resetPomodoro: () => dispatch({ type: ACTIONS.RESET_POMODORO }),
+    incrementWorkTime: (projectId, taskId, seconds = 1) =>
+      dispatch({ type: ACTIONS.INCREMENT_WORK_TIME, payload: { projectId, taskId, seconds } }),
+    setCurrentTask: (taskId) => dispatch({ type: ACTIONS.SET_CURRENT_TASK, payload: taskId }),
   };
 
   const value = {
@@ -319,6 +499,7 @@ export function AppProvider({ children }) {
 }
 
 // Hook to use the context
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const context = useContext(AppContext);
   if (!context) {
@@ -326,5 +507,3 @@ export function useApp() {
   }
   return context;
 }
-
-

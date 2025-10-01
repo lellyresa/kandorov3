@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Edit, Trash2, Clock, CheckCircle } from 'lucide-react';
+import { GripVertical, Edit, Trash2, Clock, CheckCircle, Circle, CircleDot } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export default function TaskCard({ task, columnId, onEdit, onDelete }) {
+export default function TaskCard({
+  task,
+  columnId,
+  onDelete,
+  showFocusToggle = false,
+  isFocusTask = false,
+  onSelectFocus = () => {}
+}) {
   const { state, actions } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
@@ -34,6 +41,19 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  const formatWorkTime = (totalSeconds) => {
+    const seconds = Math.max(0, totalSeconds || 0);
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
+        .toString()
+        .padStart(2, '0')}`;
+    }
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleSave = () => {
@@ -76,35 +96,66 @@ export default function TaskCard({ task, columnId, onEdit, onDelete }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="modern-card modern-card-hover group cursor-pointer"
+      className={`modern-card modern-card-hover group cursor-pointer ${
+        isFocusTask ? 'ring-2 ring-accent-500/40' : ''
+      }`}
     >
       <div className="p-4">
         {/* Drag Handle */}
         <div className="flex items-start justify-between mb-3">
-          <div
-            {...attributes}
-            {...listeners}
-            className="p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
-          >
-            <GripVertical className="w-4 h-4" />
+          <div className="flex items-center gap-2">
+            <div
+              {...attributes}
+              {...listeners}
+              className="p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
+            >
+              <GripVertical className="w-4 h-4" />
+            </div>
           </div>
 
-          {/* Task Actions */}
-          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="p-1 text-gray-400 hover:text-accent-400 rounded hover:bg-gray-700/50 transition-colors"
-              title="Edit task"
+          <div className="flex items-center space-x-2">
+            {showFocusToggle && (
+              <button
+                onClick={onSelectFocus}
+                className={`p-1 rounded-full transition-colors ${
+                  isFocusTask
+                    ? 'text-accent-200 bg-accent-500/20 hover:bg-accent-500/30'
+                    : 'text-gray-500 hover:text-accent-300 hover:bg-gray-700/40'
+                }`}
+                title={isFocusTask ? 'Currently focused task' : 'Set as focused task'}
+              >
+                {isFocusTask ? (
+                  <CircleDot className="w-4 h-4" />
+                ) : (
+                  <Circle className="w-4 h-4" />
+                )}
+              </button>
+            )}
+            <div
+              className={`px-2 py-1 rounded-lg text-xs font-mono ${
+                isFocusTask
+                  ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
+                  : 'bg-gray-800/60 text-gray-300'
+              }`}
             >
-              <Edit className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() => onDelete && onDelete(task.id)}
-              className="p-1 text-gray-400 hover:text-danger-400 rounded hover:bg-gray-700/50 transition-colors"
-              title="Delete task"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
+              {formatWorkTime(task.workSeconds)}
+            </div>
+            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-1 text-gray-400 hover:text-accent-400 rounded hover:bg-gray-700/50 transition-colors"
+                title="Edit task"
+              >
+                <Edit className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => onDelete && onDelete(task.id)}
+                className="p-1 text-gray-400 hover:text-danger-400 rounded hover:bg-gray-700/50 transition-colors"
+                title="Delete task"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         </div>
 

@@ -8,15 +8,16 @@ import {
   Plus,
   Folder,
   BarChart3,
-  Users,
-  FileText,
   Bell,
-  Search
+  Search,
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 
-export default function Sidebar() {
+export default function Sidebar({ onCreateProject = () => {} }) {
   const { state, actions } = useApp();
   const activeProject = state.projects.find(p => p.id === state.activeProjectId);
+  const activeProjectId = state.activeProjectId;
 
   const sidebarItems = [
     {
@@ -82,6 +83,63 @@ export default function Sidebar() {
           })}
         </div>
 
+        {/* Projects */}
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Projects
+            </h3>
+            <button
+              onClick={onCreateProject}
+              className="p-1.5 text-gray-400 hover:text-accent-400 rounded-lg hover:bg-gray-800/60 transition-colors"
+              title="Create project"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="space-y-1">
+            {state.projects.length === 0 && (
+              <div className="text-xs text-gray-500 bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2">
+                No projects yet. Create one to get started.
+              </div>
+            )}
+            {state.projects.map((project) => {
+              const isActive = activeProjectId === project.id;
+
+              const handleDeleteProject = (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                if (window.confirm(`Delete project "${project.name}"? This will remove all of its columns and tasks.`)) {
+                  actions.deleteProject(project.id);
+                }
+              };
+
+              return (
+                <div key={project.id} className="flex items-center gap-2">
+                  <button
+                    onClick={() => actions.setActiveProject(project.id)}
+                    className={`sidebar-item flex-1 justify-between ${
+                      isActive
+                        ? 'bg-accent-600/20 text-accent-200 border border-accent-500/30'
+                        : 'bg-transparent text-gray-300'
+                    }`}
+                  >
+                    <span className="truncate text-left">{project.name}</span>
+                    {isActive && <Sparkles className="w-4 h-4 text-accent-300" />}
+                  </button>
+                  <button
+                    onClick={handleDeleteProject}
+                    className="p-2 text-gray-500 hover:text-danger-400 rounded-lg hover:bg-danger-500/10 transition-colors"
+                    title="Delete project"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Active Project Section */}
         {activeProject && (
           <div className="mt-8 pt-6 border-t border-gray-700/50">
@@ -115,7 +173,7 @@ export default function Sidebar() {
             Quick Actions
           </h3>
           <div className="space-y-1">
-            <button className="sidebar-item w-full text-left">
+            <button className="sidebar-item w-full text-left" onClick={onCreateProject}>
               <Plus className="w-5 h-5" />
               <span>New Project</span>
             </button>
@@ -147,4 +205,3 @@ export default function Sidebar() {
     </aside>
   );
 }
-
