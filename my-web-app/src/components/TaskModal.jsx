@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Clock, CheckCircle, Circle, CircleDot, Edit, Save, Calendar } from 'lucide-react';
+import { X, Trash2, CheckCircle, Circle, Calendar } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 // DatePicker Component
@@ -175,7 +175,6 @@ function DatePicker({ value, onChange, onClose }) {
 
 export default function TaskModal() {
   const { state, actions } = useApp();
-  const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -191,18 +190,27 @@ export default function TaskModal() {
 
   const handleClose = () => {
     actions.closeTaskModal();
-    setIsEditing(false);
     setShowDatePicker(false);
   };
 
-  const handleSave = () => {
-    if (editTitle.trim() && projectId && task) {
+  const handleTitleBlur = () => {
+    if (editTitle.trim() && projectId && task && editTitle !== task.title) {
       actions.updateTask(projectId, {
         ...task,
         title: editTitle.trim(),
+      });
+    } else if (!editTitle.trim()) {
+      // Restore original title if empty
+      setEditTitle(task.title);
+    }
+  };
+
+  const handleDescriptionBlur = () => {
+    if (projectId && task && editDescription !== task.description) {
+      actions.updateTask(projectId, {
+        ...task,
         description: editDescription.trim(),
       });
-      setIsEditing(false);
     }
   };
 
@@ -214,16 +222,8 @@ export default function TaskModal() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
-      handleSave();
-    } else if (e.key === 'Escape') {
-      if (isEditing) {
-        setEditTitle(task.title);
-        setEditDescription(task.description);
-        setIsEditing(false);
-      } else {
-        handleClose();
-      }
+    if (e.key === 'Escape') {
+      handleClose();
     }
   };
 
@@ -289,27 +289,7 @@ export default function TaskModal() {
     >
       <div className="relative w-full max-w-2xl bg-gray-900/90 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700/50">
-          <div className="flex items-center space-x-3">
-            {isEditing ? (
-              <button
-                onClick={handleSave}
-                className="flex items-center space-x-2 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 text-white text-sm rounded-lg transition-colors"
-              >
-                <Save className="w-4 h-4" />
-                <span>Save</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex items-center space-x-2 px-3 py-1.5 text-gray-300 hover:text-accent-300 hover:bg-gray-800/50 text-sm rounded-lg transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Edit</span>
-              </button>
-            )}
-          </div>
-
+        <div className="flex items-center justify-end p-6 border-b border-gray-700/50">
           <button
             onClick={handleClose}
             className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-lg transition-colors"
@@ -322,20 +302,14 @@ export default function TaskModal() {
         <div className="p-6 space-y-6">
           {/* Title and Time */}
           <div className="space-y-2">
-            {isEditing ? (
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full text-2xl font-bold bg-transparent border-none outline-none text-white placeholder-gray-500 focus:ring-0"
-                placeholder="Task title"
-                autoFocus
-              />
-            ) : (
-              <h2 className="text-2xl font-bold text-white leading-tight">
-                {task.title}
-              </h2>
-            )}
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={handleTitleBlur}
+              className="w-full text-2xl font-bold bg-transparent border-none outline-none text-white placeholder-gray-500 focus:ring-0 hover:bg-gray-800/30 rounded-lg px-2 py-1 -mx-2 transition-colors"
+              placeholder="Task title"
+            />
             <p className="text-sm text-gray-400">
               {formatTimeAgo(task.createdAt)}
             </p>
@@ -344,25 +318,14 @@ export default function TaskModal() {
           {/* Description */}
           <div className="space-y-2">
             <div className="text-sm text-gray-400 uppercase tracking-wide">Description</div>
-            {isEditing ? (
-              <textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full min-h-[120px] bg-gray-800/50 border border-gray-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 resize-none"
-                placeholder="Task description (optional)"
-                rows={4}
-              />
-            ) : (
-              <div className="bg-gray-800/30 rounded-lg px-4 py-3 min-h-[120px]">
-                {task.description ? (
-                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                    {task.description}
-                  </p>
-                ) : (
-                  <p className="text-gray-500 italic">No description provided</p>
-                )}
-              </div>
-            )}
+            <textarea
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              onBlur={handleDescriptionBlur}
+              className="w-full min-h-[120px] bg-gray-800/30 hover:bg-gray-800/50 border border-transparent hover:border-gray-600/50 focus:border-accent-500/50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 resize-none transition-colors"
+              placeholder="Add a description..."
+              rows={4}
+            />
           </div>
 
           {/* Due Date */}
@@ -435,29 +398,19 @@ export default function TaskModal() {
               )}
             </div>
 
-            <div className="flex items-center space-x-3">
-              {isEditing && (
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  Save Changes
-                </button>
-              )}
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 border border-red-600/30 hover:border-red-600/50 text-sm font-medium rounded-lg transition-colors"
-              >
-                Delete Task
-              </button>
-            </div>
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 border border-red-600/30 hover:border-red-600/50 text-sm font-medium rounded-lg transition-colors"
+            >
+              Delete Task
+            </button>
           </div>
         </div>
 
         {/* Keyboard shortcuts hint */}
         <div className="px-6 pb-4">
           <div className="text-xs text-gray-500 text-center">
-            Press <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+Enter</kbd> to save, <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Escape</kbd> to cancel/close
+            Press <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Escape</kbd> to close
           </div>
         </div>
       </div>
