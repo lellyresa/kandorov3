@@ -178,16 +178,19 @@ export default function TaskModal() {
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentDueDate, setCurrentDueDate] = useState(null);
+  const [currentTask, setCurrentTask] = useState(null);
 
   const { isOpen, task, projectId } = state.taskModal;
 
-  // Sync local state when task changes
   useEffect(() => {
     if (task) {
       setEditTitle(task.title);
       setEditDescription(task.description);
+      setCurrentDueDate(task.dueDate);
+      setCurrentTask(task);
     }
-  }, [task, task?.title, task?.description, task?.dueDate, task?.priority]);
+  }, [task]);
 
   const handleClose = () => {
     actions.closeTaskModal();
@@ -195,29 +198,27 @@ export default function TaskModal() {
   };
 
   const handleTitleBlur = () => {
-    if (editTitle.trim() && projectId && task && editTitle !== task.title) {
-      actions.updateTask(projectId, {
-        ...task,
-        title: editTitle.trim(),
-      });
+    if (editTitle.trim() && projectId && currentTask && editTitle !== currentTask.title) {
+      const updatedTask = { ...currentTask, title: editTitle.trim() };
+      setCurrentTask(updatedTask);
+      actions.updateTask(projectId, updatedTask);
     } else if (!editTitle.trim()) {
       // Restore original title if empty
-      setEditTitle(task.title);
+      setEditTitle(currentTask?.title || '');
     }
   };
 
   const handleDescriptionBlur = () => {
-    if (projectId && task && editDescription !== task.description) {
-      actions.updateTask(projectId, {
-        ...task,
-        description: editDescription.trim(),
-      });
+    if (projectId && currentTask && editDescription !== currentTask.description) {
+      const updatedTask = { ...currentTask, description: editDescription.trim() };
+      setCurrentTask(updatedTask);
+      actions.updateTask(projectId, updatedTask);
     }
   };
 
   const handleDelete = () => {
-    if (projectId && task) {
-      actions.deleteTask(projectId, task.id);
+    if (projectId && currentTask) {
+      actions.deleteTask(projectId, currentTask.id);
       handleClose();
     }
   };
@@ -236,11 +237,12 @@ export default function TaskModal() {
   };
 
   const handlePriorityChange = (priority) => {
-    if (projectId && task) {
-      actions.updateTask(projectId, {
-        ...task,
-        priority: priority,
-      });
+    if (projectId && currentTask) {
+      // Update local state immediately for instant visual feedback
+      const updatedTask = { ...currentTask, priority };
+      setCurrentTask(updatedTask);
+
+      actions.updateTask(projectId, updatedTask);
     }
   };
 
@@ -312,7 +314,7 @@ export default function TaskModal() {
               placeholder="Task title"
             />
             <p className="text-sm text-gray-400">
-              {formatTimeAgo(task.createdAt)}
+              {formatTimeAgo(currentTask?.createdAt)}
             </p>
           </div>
 
@@ -341,18 +343,20 @@ export default function TaskModal() {
                 className="w-full bg-gray-800/30 rounded-lg px-4 py-3 text-left hover:bg-gray-800/50 transition-colors flex items-center justify-between"
               >
                 <p className="text-white text-sm">
-                  {formatDueDate(task.dueDate)}
+                  {formatDueDate(currentDueDate)}
                 </p>
                 <Calendar className="w-4 h-4 text-gray-400" />
               </button>
               {showDatePicker && (
                 <DatePicker
-                  value={task.dueDate}
+                  key={currentDueDate}
+                  value={currentDueDate}
                   onChange={(newDate) => {
-                    actions.updateTask(projectId, {
-                      ...task,
-                      dueDate: newDate,
-                    });
+                    setCurrentDueDate(newDate);
+                    const updatedTask = { ...currentTask, dueDate: newDate };
+                    setCurrentTask(updatedTask);
+                    actions.updateTask(projectId, updatedTask);
+                    setShowDatePicker(false);
                   }}
                   onClose={() => setShowDatePicker(false)}
                 />
@@ -368,7 +372,7 @@ export default function TaskModal() {
                 <button
                   key={priority}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
-                    (task.priority?.toLowerCase() === priority)
+                    (currentTask?.priority?.toLowerCase() === priority)
                       ? getPriorityColor(priority)
                       : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50 hover:text-gray-300'
                   }`}
@@ -386,7 +390,7 @@ export default function TaskModal() {
           {/* Action Buttons */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
             <div className="flex items-center space-x-2">
-              {task.status === 'done' ? (
+              {currentTask?.status === 'done' ? (
                 <div className="flex items-center space-x-2 text-green-400">
                   <CheckCircle className="w-5 h-5" />
                   <span className="font-medium">Completed</span>
