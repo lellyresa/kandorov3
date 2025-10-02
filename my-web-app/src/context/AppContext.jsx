@@ -217,10 +217,16 @@ function appReducer(state, action) {
       // Update the modal task if it's the same task being updated
       let taskModal = state.taskModal;
       if (taskModal.isOpen && taskModal.task && taskModal.task.id === action.payload.task.id) {
-        taskModal = {
-          ...taskModal,
-          task: { ...action.payload.task }, // Create new reference to trigger re-render
-        };
+        // Get the updated task from the projects array to ensure we have all properties
+        const updatedProject = projects.find(p => p.id === action.payload.projectId);
+        const updatedTask = updatedProject ? updatedProject.getTaskById(action.payload.task.id) : null;
+        
+        if (updatedTask) {
+          taskModal = {
+            ...taskModal,
+            task: cloneTask(updatedTask), // Clone the complete updated task
+          };
+        }
       }
 
       return {

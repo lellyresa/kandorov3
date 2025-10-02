@@ -123,10 +123,18 @@ export default function TaskModal() {
 
   useEffect(() => {
     if (task) {
-      setEditTitle(task.title);
-      setEditDescription(task.description);
+      setEditTitle(task.title || '');
+      setEditDescription(task.description || '');
     }
   }, [task]);
+
+  // Safety check - if modal is open but task is missing, close it
+  useEffect(() => {
+    if (isOpen && !task) {
+      console.error('TaskModal: Modal is open but task is missing!');
+      actions.closeTaskModal();
+    }
+  }, [isOpen, task, actions]);
 
   const handleClose = () => {
     actions.closeTaskModal();
@@ -176,7 +184,28 @@ export default function TaskModal() {
     }
   };
 
-  if (!isOpen || !task) return null;
+  if (!isOpen) return null;
+  
+  // If modal is open but task is null, show error state
+  if (!task) {
+    console.error('TaskModal: Rendering with null task!');
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="relative w-full max-w-2xl bg-gray-900/90 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl p-6">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-white mb-4">Error: Task Not Found</h2>
+            <p className="text-gray-400 mb-4">The task could not be loaded.</p>
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-lg transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const formatTimeAgo = (date) => {
     const now = new Date();
@@ -351,10 +380,27 @@ export default function TaskModal() {
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    actions.updateTask(projectId, {
-                      ...task,
-                      priority: priority,
+                    console.log('Priority button clicked:', {
+                      priority,
+                      taskId: task.id,
+                      projectId,
+                      currentTask: task
                     });
+                    
+                    if (!projectId || !task || !task.id) {
+                      console.error('Missing required data:', { projectId, task });
+                      return;
+                    }
+                    
+                    try {
+                      actions.updateTask(projectId, {
+                        ...task,
+                        priority: priority,
+                      });
+                      console.log('Task update action dispatched successfully');
+                    } catch (error) {
+                      console.error('Error updating task:', error);
+                    }
                   }}
                 >
                   {priority.toUpperCase()}
