@@ -181,12 +181,13 @@ export default function TaskModal() {
 
   const { isOpen, task, projectId } = state.taskModal;
 
+  // Sync local state when task changes
   useEffect(() => {
     if (task) {
       setEditTitle(task.title);
       setEditDescription(task.description);
     }
-  }, [task]);
+  }, [task, task?.title, task?.description, task?.dueDate, task?.priority]);
 
   const handleClose = () => {
     actions.closeTaskModal();
