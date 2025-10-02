@@ -195,6 +195,7 @@ export default function TaskModal() {
   const handleClose = () => {
     actions.closeTaskModal();
     setShowDatePicker(false);
+    setCurrentTask(null);
   };
 
   const handleTitleBlur = () => {
@@ -246,7 +247,21 @@ export default function TaskModal() {
     }
   };
 
-  if (!isOpen || !task) return null;
+  if (!isOpen) return null;
+
+  // Handle case where task might not be loaded yet
+  if (!task) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+        <div className="w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading task...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const formatTimeAgo = (date) => {
     const now = new Date();
@@ -286,11 +301,11 @@ export default function TaskModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
       onClick={handleBackdropClick}
       onKeyDown={handleKeyPress}
     >
-      <div className="relative w-full max-w-2xl bg-gray-900/90 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl">
+      <div className="relative w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-end p-6 border-b border-gray-700/50">
           <button
