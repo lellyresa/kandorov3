@@ -213,22 +213,6 @@ function appReducer(state, action) {
         if (task) task.update(action.payload.task);
       });
       const currentTaskId = resolveCurrentTaskId(projects, state.pomodoroState.currentTaskId, state.activeProjectId);
-
-      // Update the modal task if it's the same task being updated
-      let taskModal = state.taskModal;
-      if (taskModal.isOpen && taskModal.task && taskModal.task.id === action.payload.task.id) {
-        // Get the updated task from the projects array to ensure we have all properties
-        const updatedProject = projects.find(p => p.id === action.payload.projectId);
-        const updatedTask = updatedProject ? updatedProject.getTaskById(action.payload.task.id) : null;
-        
-        if (updatedTask) {
-          taskModal = {
-            ...taskModal,
-            task: cloneTask(updatedTask), // Clone the complete updated task
-          };
-        }
-      }
-
       return {
         ...state,
         projects,
@@ -236,7 +220,6 @@ function appReducer(state, action) {
           ...state.pomodoroState,
           currentTaskId,
         },
-        taskModal,
       };
     }
 

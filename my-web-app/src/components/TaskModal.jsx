@@ -2,12 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { X, Trash2, Clock, CheckCircle, Circle, CircleDot, Edit, Save, Calendar } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
+// DatePicker Component
 function DatePicker({ value, onChange, onClose }) {
   const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : new Date());
+  const [selectedHour, setSelectedHour] = useState(value ? new Date(value).getHours() : 12);
+  const [selectedMinute, setSelectedMinute] = useState(value ? new Date(value).getMinutes() : 0);
 
   const handleDateClick = (date) => {
     setSelectedDate(date);
-    onChange(date.toISOString());
+  };
+
+  const handleTimeSet = () => {
+    const finalDate = new Date(selectedDate);
+    finalDate.setHours(selectedHour);
+    finalDate.setMinutes(selectedMinute);
+    onChange(finalDate.toISOString());
     onClose();
   };
 
@@ -39,10 +48,11 @@ function DatePicker({ value, onChange, onClose }) {
   const calendarDays = generateCalendarDays();
 
   return (
-    <div className="absolute top-full left-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 min-w-[280px]">
+    <div className="absolute top-full left-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 min-w-[320px]">
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1);
             setSelectedDate(newDate);
           }}
@@ -54,7 +64,8 @@ function DatePicker({ value, onChange, onClose }) {
           {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </div>
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
             setSelectedDate(newDate);
           }}
@@ -72,11 +83,14 @@ function DatePicker({ value, onChange, onClose }) {
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 mb-4">
         {calendarDays.map((date, index) => (
           <button
             key={index}
-            onClick={() => date && handleDateClick(date)}
+            onClick={(e) => {
+              e.stopPropagation();
+              date && handleDateClick(date);
+            }}
             className={`text-center py-2 text-sm rounded hover:bg-gray-700 ${
               date
                 ? date.toDateString() === selectedDate.toDateString()
@@ -91,22 +105,69 @@ function DatePicker({ value, onChange, onClose }) {
         ))}
       </div>
 
-      <div className="flex justify-end mt-4 space-x-2">
+      {/* Time Selection */}
+      <div className="space-y-3 border-t border-gray-700 pt-4">
+        <div className="text-sm text-gray-400">Time</div>
+        <div className="flex items-center space-x-2">
+          <select
+            value={selectedHour}
+            onChange={(e) => setSelectedHour(parseInt(e.target.value))}
+            className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={i}>
+                {i.toString().padStart(2, '0')}
+              </option>
+            ))}
+          </select>
+          <span className="text-gray-400">:</span>
+          <select
+            value={selectedMinute}
+            onChange={(e) => setSelectedMinute(parseInt(e.target.value))}
+            className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {Array.from({ length: 60 }, (_, i) => (
+              <option key={i} value={i}>
+                {i.toString().padStart(2, '0')}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="flex justify-between mt-4 space-x-2">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             onChange(null);
             onClose();
           }}
-          className="px-3 py-1 text-xs text-gray-400 hover:text-white"
+          className="px-3 py-1.5 text-xs text-gray-400 hover:text-white rounded-lg hover:bg-gray-700 transition-colors"
         >
           Clear
         </button>
-        <button
-          onClick={onClose}
-          className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
-        >
-          Done
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleTimeSet();
+            }}
+            className="px-3 py-1.5 text-xs bg-accent-600 hover:bg-accent-700 text-white rounded-lg transition-colors"
+          >
+            Set Date
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -123,18 +184,10 @@ export default function TaskModal() {
 
   useEffect(() => {
     if (task) {
-      setEditTitle(task.title || '');
-      setEditDescription(task.description || '');
+      setEditTitle(task.title);
+      setEditDescription(task.description);
     }
   }, [task]);
-
-  // Safety check - if modal is open but task is missing, close it
-  useEffect(() => {
-    if (isOpen && !task) {
-      console.error('TaskModal: Modal is open but task is missing!');
-      actions.closeTaskModal();
-    }
-  }, [isOpen, task, actions]);
 
   const handleClose = () => {
     actions.closeTaskModal();
@@ -164,9 +217,7 @@ export default function TaskModal() {
     if (e.key === 'Enter' && e.ctrlKey) {
       handleSave();
     } else if (e.key === 'Escape') {
-      if (showDatePicker) {
-        setShowDatePicker(false);
-      } else if (isEditing) {
+      if (isEditing) {
         setEditTitle(task.title);
         setEditDescription(task.description);
         setIsEditing(false);
@@ -180,32 +231,19 @@ export default function TaskModal() {
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       handleClose();
-      setShowDatePicker(false);
     }
   };
 
-  if (!isOpen) return null;
-  
-  // If modal is open but task is null, show error state
-  if (!task) {
-    console.error('TaskModal: Rendering with null task!');
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div className="relative w-full max-w-2xl bg-gray-900/90 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl p-6">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-white mb-4">Error: Task Not Found</h2>
-            <p className="text-gray-400 mb-4">The task could not be loaded.</p>
-            <button
-              onClick={handleClose}
-              className="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-lg transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handlePriorityChange = (priority) => {
+    if (projectId && task) {
+      actions.updateTask(projectId, {
+        ...task,
+        priority: priority,
+      });
+    }
+  };
+
+  if (!isOpen || !task) return null;
 
   const formatTimeAgo = (date) => {
     const now = new Date();
@@ -245,7 +283,7 @@ export default function TaskModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={handleBackdropClick}
       onKeyDown={handleKeyPress}
     >
@@ -255,10 +293,7 @@ export default function TaskModal() {
           <div className="flex items-center space-x-3">
             {isEditing ? (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSave();
-                }}
+                onClick={handleSave}
                 className="flex items-center space-x-2 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 text-white text-sm rounded-lg transition-colors"
               >
                 <Save className="w-4 h-4" />
@@ -266,10 +301,7 @@ export default function TaskModal() {
               </button>
             ) : (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }}
+                onClick={() => setIsEditing(true)}
                 className="flex items-center space-x-2 px-3 py-1.5 text-gray-300 hover:text-accent-300 hover:bg-gray-800/50 text-sm rounded-lg transition-colors"
               >
                 <Edit className="w-4 h-4" />
@@ -279,10 +311,7 @@ export default function TaskModal() {
           </div>
 
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClose();
-            }}
+            onClick={handleClose}
             className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
@@ -345,11 +374,12 @@ export default function TaskModal() {
                   e.stopPropagation();
                   setShowDatePicker(!showDatePicker);
                 }}
-                className="w-full bg-gray-800/30 rounded-lg px-4 py-3 text-left hover:bg-gray-800/50 transition-colors"
+                className="w-full bg-gray-800/30 rounded-lg px-4 py-3 text-left hover:bg-gray-800/50 transition-colors flex items-center justify-between"
               >
                 <p className="text-white text-sm">
                   {formatDueDate(task.dueDate)}
                 </p>
+                <Calendar className="w-4 h-4 text-gray-400" />
               </button>
               {showDatePicker && (
                 <DatePicker
@@ -373,34 +403,14 @@ export default function TaskModal() {
               {['low', 'medium', 'high'].map((priority) => (
                 <button
                   key={priority}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
                     (task.priority?.toLowerCase() === priority)
                       ? getPriorityColor(priority)
-                      : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50'
+                      : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50 hover:text-gray-300'
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('Priority button clicked:', {
-                      priority,
-                      taskId: task.id,
-                      projectId,
-                      currentTask: task
-                    });
-                    
-                    if (!projectId || !task || !task.id) {
-                      console.error('Missing required data:', { projectId, task });
-                      return;
-                    }
-                    
-                    try {
-                      actions.updateTask(projectId, {
-                        ...task,
-                        priority: priority,
-                      });
-                      console.log('Task update action dispatched successfully');
-                    } catch (error) {
-                      console.error('Error updating task:', error);
-                    }
+                    handlePriorityChange(priority);
                   }}
                 >
                   {priority.toUpperCase()}
@@ -428,20 +438,14 @@ export default function TaskModal() {
             <div className="flex items-center space-x-3">
               {isEditing && (
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSave();
-                  }}
+                  onClick={handleSave}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Save Changes
                 </button>
               )}
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete();
-                }}
+                onClick={handleDelete}
                 className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 border border-red-600/30 hover:border-red-600/50 text-sm font-medium rounded-lg transition-colors"
               >
                 Delete Task

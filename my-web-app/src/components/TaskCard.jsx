@@ -52,15 +52,6 @@ export default function TaskCard({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'low': return 'bg-green-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'high': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
   const handleCardClick = () => {
     if (project) {
       actions.openTaskModal(task, project.id);
@@ -72,10 +63,8 @@ export default function TaskCard({
       <div
         ref={setNodeRef}
         style={style}
-        className="modern-card border-2 border-accent-500/50 border-dashed opacity-60 p-4 pr-8 shadow-dark-large relative"
+        className="modern-card border-2 border-accent-500/50 border-dashed opacity-60 p-4 shadow-dark-large"
       >
-        {/* Priority Indicator for dragging state */}
-        <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`}></div>
         <div className="animate-pulse">
           <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
           <div className="h-3 bg-gray-600/30 rounded w-3/4"></div>
@@ -88,14 +77,12 @@ export default function TaskCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`modern-card modern-card-hover group cursor-pointer transition-transform hover:scale-[1.02] relative ${
+      className={`modern-card modern-card-hover group cursor-pointer transition-transform hover:scale-[1.02] ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
       onClick={handleCardClick}
     >
-      {/* Priority Indicator */}
-      <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`}></div>
-      <div className="p-4 pr-8">
+      <div className="p-4">
         {/* Drag Handle */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
