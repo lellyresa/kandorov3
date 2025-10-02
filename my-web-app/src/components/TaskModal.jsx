@@ -296,8 +296,8 @@ export default function TaskModal() {
 
   if (!isOpen) return null;
 
-  // Handle case where task might not be loaded yet
-  if (!task) {
+  // Handle case where task might not be loaded yet (only for edit mode)
+  if (mode === 'edit' && !task) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
         <div className="w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-8">
