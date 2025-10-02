@@ -146,9 +146,15 @@ export default function TaskModal() {
   const handleSave = () => {
     if (editTitle.trim() && projectId && task) {
       actions.updateTask(projectId, {
-        ...task,
+        id: task.id,
         title: editTitle.trim(),
         description: editDescription.trim(),
+        priority: task.priority,
+        status: task.status,
+        pomodoroCount: task.pomodoroCount,
+        workSeconds: task.workSeconds,
+        dueDate: task.dueDate,
+        createdAt: task.createdAt,
       });
       setIsEditing(false);
     }
@@ -333,8 +339,15 @@ export default function TaskModal() {
                   value={task.dueDate}
                   onChange={(newDate) => {
                     actions.updateTask(projectId, {
-                      ...task,
+                      id: task.id,
+                      title: task.title,
+                      description: task.description,
+                      priority: task.priority,
+                      status: task.status,
+                      pomodoroCount: task.pomodoroCount,
+                      workSeconds: task.workSeconds,
                       dueDate: newDate,
+                      createdAt: task.createdAt,
                     });
                   }}
                   onClose={() => setShowDatePicker(false)}
@@ -358,8 +371,15 @@ export default function TaskModal() {
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent modal from closing
                     actions.updateTask(projectId, {
-                      ...task,
+                      id: task.id,
+                      title: task.title,
+                      description: task.description,
                       priority: priority,
+                      status: task.status,
+                      pomodoroCount: task.pomodoroCount,
+                      workSeconds: task.workSeconds,
+                      dueDate: task.dueDate,
+                      createdAt: task.createdAt,
                     });
                   }}
                 >
