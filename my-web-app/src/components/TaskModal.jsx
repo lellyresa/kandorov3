@@ -338,12 +338,10 @@ export default function TaskModal() {
                       : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50'
                   }`}
                   onClick={() => {
-                    console.log('Priority button clicked:', priority, 'Current task priority:', task.priority);
                     actions.updateTask(projectId, {
                       ...task,
                       priority: priority,
                     });
-                    console.log('Task updated with new priority');
                   }}
                 >
                   {priority.toUpperCase()}
