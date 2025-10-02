@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TaskCard from './TaskCard';
-import TaskForm from './TaskForm';
 import PomodoroTimer from './PomodoroTimer';
 import { COLUMN_TYPES } from '../types';
 import { Plus, Trash2, Edit } from 'lucide-react';
@@ -10,7 +9,6 @@ import { useApp } from '../context/AppContext';
 
 export default function Column({ column, tasks, projectId }) {
   const { state, actions } = useApp();
-  const [showTaskForm, setShowTaskForm] = useState(false);
 
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -25,7 +23,7 @@ export default function Column({ column, tasks, projectId }) {
   const taskIds = tasks.map(task => task.id);
 
   const handleAddTask = () => {
-    setShowTaskForm(true);
+    actions.openTaskModal(null, projectId, column.id, 'create');
   };
 
   const handleEditColumn = () => {
@@ -146,15 +144,6 @@ export default function Column({ column, tasks, projectId }) {
         </SortableContext>
       </div>
 
-      {!isActiveColumn && (
-        <TaskForm
-          isOpen={showTaskForm}
-          onClose={() => setShowTaskForm(false)}
-          projectId={projectId}
-          columnId={column.id}
-          mode="create"
-        />
-      )}
     </div>
   );
 }

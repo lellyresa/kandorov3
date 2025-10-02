@@ -39,6 +39,8 @@ const initialState = {
     isOpen: false,
     task: null,
     projectId: null,
+    columnId: null,
+    mode: 'edit', // 'create' or 'edit'
   },
 };
 
@@ -365,6 +367,8 @@ function appReducer(state, action) {
           isOpen: true,
           task: action.payload.task,
           projectId: action.payload.projectId,
+          columnId: action.payload.columnId || null,
+          mode: action.payload.mode || 'edit',
         },
       };
 
@@ -375,6 +379,8 @@ function appReducer(state, action) {
           isOpen: false,
           task: null,
           projectId: null,
+          columnId: null,
+          mode: 'edit',
         },
       };
 
@@ -515,7 +521,8 @@ export function AppProvider({ children }) {
     incrementWorkTime: (projectId, taskId, seconds = 1) =>
       dispatch({ type: ACTIONS.INCREMENT_WORK_TIME, payload: { projectId, taskId, seconds } }),
     setCurrentTask: (taskId) => dispatch({ type: ACTIONS.SET_CURRENT_TASK, payload: taskId }),
-    openTaskModal: (task, projectId) => dispatch({ type: ACTIONS.OPEN_TASK_MODAL, payload: { task, projectId } }),
+    openTaskModal: (task, projectId, columnId, mode = 'edit') =>
+      dispatch({ type: ACTIONS.OPEN_TASK_MODAL, payload: { task, projectId, columnId, mode } }),
     closeTaskModal: () => dispatch({ type: ACTIONS.CLOSE_TASK_MODAL }),
   };
 

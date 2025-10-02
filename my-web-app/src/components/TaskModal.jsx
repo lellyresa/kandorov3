@@ -181,16 +181,21 @@ export default function TaskModal() {
   const [currentDueDate, setCurrentDueDate] = useState(null);
   const [currentTask, setCurrentTask] = useState(null);
 
-  const { isOpen, task, projectId } = state.taskModal;
+  const { isOpen, task, projectId, columnId, mode } = state.taskModal;
 
   useEffect(() => {
-    if (task) {
+    if (mode === 'edit' && task) {
       setEditTitle(task.title);
       setEditDescription(task.description);
       setCurrentDueDate(task.dueDate);
       setCurrentTask(task);
+    } else if (mode === 'create') {
+      setEditTitle('');
+      setEditDescription('');
+      setCurrentDueDate(null);
+      setCurrentTask(null);
     }
-  }, [task]);
+  }, [task, mode]);
 
   const handleClose = () => {
     actions.closeTaskModal();
@@ -199,19 +204,61 @@ export default function TaskModal() {
   };
 
   const handleTitleBlur = () => {
-    if (editTitle.trim() && projectId && currentTask && editTitle !== currentTask.title) {
+    if (mode === 'edit' && editTitle.trim() && projectId && currentTask && editTitle !== currentTask.title) {
       const updatedTask = { ...currentTask, title: editTitle.trim() };
       setCurrentTask(updatedTask);
       actions.updateTask(projectId, updatedTask);
+    } else if (mode === 'create' && editTitle.trim() && projectId) {
+      // For create mode, we'll handle saving in handleSave
+      return;
     } else if (!editTitle.trim()) {
-      // Restore original title if empty
-      setEditTitle(currentTask?.title || '');
+      // Restore original title if empty (for edit mode)
+      if (mode === 'edit' && currentTask) {
+        setEditTitle(currentTask.title);
+      }
     }
   };
 
   const handleDescriptionBlur = () => {
-    if (projectId && currentTask && editDescription !== currentTask.description) {
+    if (mode === 'edit' && projectId && currentTask && editDescription !== currentTask.description) {
       const updatedTask = { ...currentTask, description: editDescription.trim() };
+      setCurrentTask(updatedTask);
+      actions.updateTask(projectId, updatedTask);
+    }
+    // For create mode, we'll handle saving in handleSave
+  };
+
+  const handleSave = () => {
+    if (!editTitle.trim() || !projectId) return;
+
+    if (mode === 'create') {
+      // Create new task
+      const newTask = {
+        id: `task-${Date.now()}`,
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        status: 'todo',
+        priority: 'medium',
+        createdAt: new Date().toISOString(),
+        workSeconds: 0,
+        pomodoroCount: 0,
+      };
+
+      actions.addTask(projectId, newTask);
+
+      // Move task to the specified column if provided
+      if (columnId) {
+        actions.moveTask(projectId, newTask.id, columnId);
+      }
+
+      handleClose();
+    } else if (mode === 'edit' && currentTask) {
+      // Update existing task
+      const updatedTask = {
+        ...currentTask,
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+      };
       setCurrentTask(updatedTask);
       actions.updateTask(projectId, updatedTask);
     }
@@ -307,13 +354,26 @@ export default function TaskModal() {
     >
       <div className="relative w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-end p-6 border-b border-gray-700/50">
-          <button
-            onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        <div className="flex items-center justify-between p-6 border-b border-gray-700/50">
+          <h2 className="text-2xl font-bold text-white">
+            {mode === 'create' ? 'Create New Task' : 'Edit Task'}
+          </h2>
+          <div className="flex items-center space-x-3">
+            {mode === 'create' && (
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Create Task
+              </button>
+            )}
+            <button
+              onClick={handleClose}
+              className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
