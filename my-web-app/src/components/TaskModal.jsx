@@ -42,8 +42,7 @@ function DatePicker({ value, onChange, onClose }) {
     <div className="absolute top-full left-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 min-w-[280px]">
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={() => {
             const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1);
             setSelectedDate(newDate);
           }}
@@ -55,8 +54,7 @@ function DatePicker({ value, onChange, onClose }) {
           {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </div>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={() => {
             const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
             setSelectedDate(newDate);
           }}
@@ -78,10 +76,7 @@ function DatePicker({ value, onChange, onClose }) {
         {calendarDays.map((date, index) => (
           <button
             key={index}
-            onClick={(e) => {
-              e.stopPropagation();
-              date && handleDateClick(date);
-            }}
+            onClick={() => date && handleDateClick(date)}
             className={`text-center py-2 text-sm rounded hover:bg-gray-700 ${
               date
                 ? date.toDateString() === selectedDate.toDateString()
@@ -98,8 +93,7 @@ function DatePicker({ value, onChange, onClose }) {
 
       <div className="flex justify-end mt-4 space-x-2">
         <button
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={() => {
             onChange(null);
             onClose();
           }}
@@ -108,10 +102,7 @@ function DatePicker({ value, onChange, onClose }) {
           Clear
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
+          onClick={onClose}
           className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
         >
           Done
@@ -146,15 +137,9 @@ export default function TaskModal() {
   const handleSave = () => {
     if (editTitle.trim() && projectId && task) {
       actions.updateTask(projectId, {
-        id: task.id,
+        ...task,
         title: editTitle.trim(),
         description: editDescription.trim(),
-        priority: task.priority,
-        status: task.status,
-        pomodoroCount: task.pomodoroCount,
-        workSeconds: task.workSeconds,
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
       });
       setIsEditing(false);
     }
@@ -265,7 +250,10 @@ export default function TaskModal() {
           </div>
 
           <button
-            onClick={handleClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClose();
+            }}
             className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
@@ -339,15 +327,8 @@ export default function TaskModal() {
                   value={task.dueDate}
                   onChange={(newDate) => {
                     actions.updateTask(projectId, {
-                      id: task.id,
-                      title: task.title,
-                      description: task.description,
-                      priority: task.priority,
-                      status: task.status,
-                      pomodoroCount: task.pomodoroCount,
-                      workSeconds: task.workSeconds,
+                      ...task,
                       dueDate: newDate,
-                      createdAt: task.createdAt,
                     });
                   }}
                   onClose={() => setShowDatePicker(false)}
@@ -369,17 +350,10 @@ export default function TaskModal() {
                       : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50'
                   }`}
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent modal from closing
+                    e.stopPropagation();
                     actions.updateTask(projectId, {
-                      id: task.id,
-                      title: task.title,
-                      description: task.description,
+                      ...task,
                       priority: priority,
-                      status: task.status,
-                      pomodoroCount: task.pomodoroCount,
-                      workSeconds: task.workSeconds,
-                      dueDate: task.dueDate,
-                      createdAt: task.createdAt,
                     });
                   }}
                 >
