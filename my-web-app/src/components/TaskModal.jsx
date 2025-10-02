@@ -42,7 +42,8 @@ function DatePicker({ value, onChange, onClose }) {
     <div className="absolute top-full left-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 min-w-[280px]">
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1);
             setSelectedDate(newDate);
           }}
@@ -54,7 +55,8 @@ function DatePicker({ value, onChange, onClose }) {
           {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </div>
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             const newDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
             setSelectedDate(newDate);
           }}
@@ -76,7 +78,10 @@ function DatePicker({ value, onChange, onClose }) {
         {calendarDays.map((date, index) => (
           <button
             key={index}
-            onClick={() => date && handleDateClick(date)}
+            onClick={(e) => {
+              e.stopPropagation();
+              date && handleDateClick(date);
+            }}
             className={`text-center py-2 text-sm rounded hover:bg-gray-700 ${
               date
                 ? date.toDateString() === selectedDate.toDateString()
@@ -93,7 +98,8 @@ function DatePicker({ value, onChange, onClose }) {
 
       <div className="flex justify-end mt-4 space-x-2">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             onChange(null);
             onClose();
           }}
@@ -102,7 +108,10 @@ function DatePicker({ value, onChange, onClose }) {
           Clear
         </button>
         <button
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
         >
           Done
@@ -226,7 +235,10 @@ export default function TaskModal() {
           <div className="flex items-center space-x-3">
             {isEditing ? (
               <button
-                onClick={handleSave}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSave();
+                }}
                 className="flex items-center space-x-2 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 text-white text-sm rounded-lg transition-colors"
               >
                 <Save className="w-4 h-4" />
@@ -234,7 +246,10 @@ export default function TaskModal() {
               </button>
             ) : (
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
                 className="flex items-center space-x-2 px-3 py-1.5 text-gray-300 hover:text-accent-300 hover:bg-gray-800/50 text-sm rounded-lg transition-colors"
               >
                 <Edit className="w-4 h-4" />
@@ -303,7 +318,10 @@ export default function TaskModal() {
             <div className="text-sm text-gray-400 uppercase tracking-wide">Due Date</div>
             <div className="relative">
               <button
-                onClick={() => setShowDatePicker(!showDatePicker)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDatePicker(!showDatePicker);
+                }}
                 className="w-full bg-gray-800/30 rounded-lg px-4 py-3 text-left hover:bg-gray-800/50 transition-colors"
               >
                 <p className="text-white text-sm">
@@ -337,7 +355,8 @@ export default function TaskModal() {
                       ? getPriorityColor(priority)
                       : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50'
                   }`}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent modal from closing
                     actions.updateTask(projectId, {
                       ...task,
                       priority: priority,
@@ -369,14 +388,20 @@ export default function TaskModal() {
             <div className="flex items-center space-x-3">
               {isEditing && (
                 <button
-                  onClick={handleSave}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSave();
+                  }}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Save Changes
                 </button>
               )}
               <button
-                onClick={handleDelete}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                }}
                 className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 border border-red-600/30 hover:border-red-600/50 text-sm font-medium rounded-lg transition-colors"
               >
                 Delete Task
