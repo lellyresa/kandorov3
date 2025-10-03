@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, pointerWithin } from '@dnd-kit/core';
 import Column from './Column';
 import ColumnForm from './ColumnForm';
 import TaskCard from './TaskCard';
@@ -160,11 +160,11 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
       {/* Kanban Board */}
       <DndContext
-        collisionDetection={closestCorners}
+        collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-6 overflow-x-auto pb-4 min-h-96">
+        <div className="flex gap-6 overflow-x-auto pb-4 min-h-0">
           {activeProject.columns
             .sort((a, b) => a.position - b.position)
             .map((column) => {

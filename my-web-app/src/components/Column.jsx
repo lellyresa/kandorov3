@@ -15,6 +15,7 @@ export default function Column({ column, tasks, projectId }) {
     data: {
       type: 'column',
       column,
+      accepts: ['task'],
     }
   });
 
@@ -48,7 +49,7 @@ export default function Column({ column, tasks, projectId }) {
 
   return (
     <div
-      className={`modern-card flex flex-col h-full min-w-80 max-w-80 overflow-hidden transition-colors duration-200 ${
+      className={`modern-card flex flex-col h-full min-w-80 max-w-80 transition-colors duration-200 ${
         isActiveColumn ? 'border-accent-500/30 bg-gray-900/80' : ''
       }`}
     >
@@ -99,14 +100,9 @@ export default function Column({ column, tasks, projectId }) {
 
       <div
         ref={setNodeRef}
-        className={`flex-1 overflow-y-auto ${isActiveColumn ? 'px-4 pb-4 pt-2' : 'p-4'} min-h-96 transition-colors duration-200 ${
-          isOver ? 'bg-accent-500/5' : ''
+        className={`flex-1 overflow-y-auto ${isActiveColumn ? 'px-4 pb-4 pt-2' : 'p-4'} transition-colors duration-200 relative ${
+          isOver ? 'bg-accent-500/10 border-2 border-accent-500/30 border-dashed' : ''
         }`}
-        style={{
-          backgroundImage: isOver
-            ? 'radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 60%)'
-            : 'none'
-        }}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           <div className="space-y-3">
