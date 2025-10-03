@@ -93,6 +93,24 @@ export default function TaskCard({
     return `${months[startOfDue.getMonth()]} ${startOfDue.getDate()}`;
   };
 
+  const getDueDateColor = (dueDate) => {
+    if (!dueDate) return '#9CA3AF'; // gray-400 fallback for no due date
+
+    const now = new Date();
+    const due = new Date(dueDate);
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDue = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diffDays = Math.round((startOfDue - startOfToday) / msPerDay);
+
+    if (diffDays < 0) return '#DC2626'; // overdue - deep red
+    if (diffDays === 0) return '#EF4444'; // today - red
+    if (diffDays === 1) return '#F97316'; // tomorrow - deep orange
+    if (diffDays >= 2 && diffDays <= 3) return '#FB923C'; // 2-3 days - orange
+    if (diffDays >= 4 && diffDays <= 7) return '#FFC107'; // 4-7 days - yellow
+    return '#4ADE80'; // 8+ days - green (calm)
+  };
+
   const getPriorityBorderHex = (priority) => {
     const level = (priority || 'medium').toLowerCase();
     switch (level) {
@@ -188,8 +206,11 @@ export default function TaskCard({
           {/* Priority and Due Date - Bottom Left */}
           <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
             {/* Due Date */}
-            <div className="flex items-center space-x-1 text-gray-400">
-              <span>
+            <div className="flex items-center space-x-1">
+              <span
+                className="transition-colors duration-300"
+                style={{ color: getDueDateColor(task.dueDate) }}
+              >
                 {formatDueDate(task.dueDate) || 'No due date'}
               </span>
             </div>
