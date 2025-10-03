@@ -117,7 +117,7 @@ export default function TaskCard({
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
-      {/* Priority Corner Section */}
+      {/* Priority Corner Highlight */}
       <div
         className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
         style={{
