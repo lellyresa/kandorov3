@@ -148,6 +148,25 @@ export default function TaskCard({
           filter: 'brightness(1.25)'
         }}
       />
+      {/* Extended sweeps up the left edge and across the bottom (doubles perceived length) */}
+      <div
+        className="absolute bottom-0 left-0 w-1.5 h-12 pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background: `linear-gradient(0deg, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.38) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.0) 90%)`,
+          zIndex: 0,
+          filter: 'brightness(1.25)'
+        }}
+      />
+      <div
+        className="absolute bottom-0 left-0 h-1.5 w-12 pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background: `linear-gradient(90deg, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.38) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.0) 90%)`,
+          zIndex: 0,
+          filter: 'brightness(1.25)'
+        }}
+      />
       <div className="p-4">
         {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-3">
