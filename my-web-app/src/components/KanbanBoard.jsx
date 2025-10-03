@@ -72,6 +72,15 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
     }
   };
 
+  // Custom collision detection that combines pointerWithin and rectIntersection
+  const customCollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    const rectCollisions = rectIntersection(args);
+
+    // Combine both results, preferring pointerWithin for more accurate detection
+    return [...new Set([...pointerCollisions, ...rectCollisions])];
+  };
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
     setActiveTask(null);
@@ -160,7 +169,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
       {/* Kanban Board */}
       <DndContext
-        collisionDetection={rectIntersection}
+        collisionDetection={customCollisionDetection}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

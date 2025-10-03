@@ -101,12 +101,15 @@ export default function Column({ column, tasks, projectId }) {
 
       <div
         ref={setNodeRef}
-        className={`flex-1 overflow-y-auto ${isActiveColumn ? 'px-4 pb-4 pt-2' : 'p-4'} transition-colors duration-200 ${
-          isOver ? 'bg-accent-500/10' : ''
+        className={`flex-1 overflow-y-auto ${isActiveColumn ? 'px-4 pb-4 pt-2' : 'p-4'} transition-all duration-200 relative min-h-32 ${
+          isOver ? 'bg-accent-500/15 border-2 border-accent-500/50 border-dashed rounded-lg' : ''
         }`}
+        style={{
+          zIndex: isOver ? 10 : 1,
+        }}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3 relative">
+          <div className="space-y-3">
             {tasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-gray-400 text-center">
                 {isActiveColumn ? (
@@ -125,29 +128,16 @@ export default function Column({ column, tasks, projectId }) {
                 )}
               </div>
             ) : (
-              tasks.map((task, index) => (
-                <div key={task.id} className="relative">
-                  {/* Invisible drop zone above each task card */}
-                  <div
-                    className={`absolute -top-2 left-0 right-0 h-4 ${isOver ? 'bg-accent-500/5' : ''}`}
-                    style={{ zIndex: 5 }}
-                  />
-                  <TaskCard
-                    task={task}
-                    columnId={column.id}
-                    onDelete={handleDeleteTask}
-                    showFocusToggle={isActiveColumn}
-                    isFocusTask={isActiveColumn && currentTaskId === task.id}
-                    onSelectFocus={() => handleFocusTask(task.id)}
-                  />
-                  {/* Invisible drop zone below each task card (except last) */}
-                  {index < tasks.length - 1 && (
-                    <div
-                      className={`absolute -bottom-2 left-0 right-0 h-4 ${isOver ? 'bg-accent-500/5' : ''}`}
-                      style={{ zIndex: 5 }}
-                    />
-                  )}
-                </div>
+              tasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  columnId={column.id}
+                  onDelete={handleDeleteTask}
+                  showFocusToggle={isActiveColumn}
+                  isFocusTask={isActiveColumn && currentTaskId === task.id}
+                  onSelectFocus={() => handleFocusTask(task.id)}
+                />
               ))
             )}
           </div>
