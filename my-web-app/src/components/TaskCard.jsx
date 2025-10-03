@@ -13,9 +13,9 @@ export default function TaskCard({
 }) {
   const { state, actions } = useApp();
 
-  // Find the project that contains this task
+  // Find the project that contains this column
   const project = state.projects.find(p =>
-    p.tasks.some(t => t.id === task.id)
+    p.columns.some(col => col.id === columnId)
   );
 
   const {
@@ -72,8 +72,11 @@ export default function TaskCard({
   };
 
   const handleCardClick = () => {
-    if (project) {
-      actions.openTaskModal(task, project.id);
+    if (project && columnId) {
+      actions.openTaskModal(task, project.id, columnId);
+    } else if (state.activeProjectId) {
+      // Fallback to active project if column project not found
+      actions.openTaskModal(task, state.activeProjectId, columnId);
     }
   };
 
@@ -146,7 +149,7 @@ export default function TaskCard({
             </div>
             <button
               onClick={(e) => {
-                e.stopPropagation(); // Prevent opening modal when clicking expand
+                e.stopPropagation(); // Prevent drag behavior when opening modal
                 handleCardClick();
               }}
               className="p-1 text-gray-400 hover:text-accent-400 transition-colors"
