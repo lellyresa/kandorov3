@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import Column from './Column';
 import ColumnForm from './ColumnForm';
@@ -89,7 +89,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
     if (!sourceColumn) return;
 
-    // Check if we're dropping on a column or on another task
+    // Check if we're dropping on a column (not another task)
     const targetColumn = activeProject.getColumnById(overId);
 
     if (targetColumn) {
@@ -99,15 +99,15 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
         actions.moveTask(activeProject.id, taskId, targetColumn.id);
       }
       // If dropping on the same column, no action needed for reordering
+      // The SortableContext with verticalListSortingStrategy handles reordering automatically
     } else {
-      // Dropping on a task - check if it's in the same column
+      // Dropping on a task - check if it's in the same column for reordering
       const targetTaskColumn = activeProject.columns.find(col =>
         col.taskIds.includes(overId)
       );
 
       if (targetTaskColumn && sourceColumn.id === targetTaskColumn.id) {
         // Reordering within the same column
-        // Calculate the new position based on where we dropped
         const currentIndex = sourceColumn.taskIds.indexOf(taskId);
         const targetIndex = sourceColumn.taskIds.indexOf(overId);
 
@@ -195,7 +195,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
       {/* Kanban Board */}
       <DndContext
-        collisionDetection={pointerWithin}
+        collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

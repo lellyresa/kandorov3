@@ -86,7 +86,7 @@ export default function TaskCard({
       <div
         ref={setNodeRef}
         style={style}
-        className="modern-card border-2 border-accent-500/50 border-dashed opacity-60 p-4 shadow-dark-large"
+        className="modern-card border-2 border-accent-500/60 border-solid opacity-80 p-4 shadow-dark-large transform rotate-3 scale-105"
       >
         <div className="animate-pulse">
           <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
@@ -102,7 +102,7 @@ export default function TaskCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02] ${
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >

@@ -270,12 +270,21 @@ function appReducer(state, action) {
       const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
         const column = project.getColumnById(action.payload.columnId);
         if (column) {
-          column.taskIds = action.payload.taskIds;
+          column.taskIds = action.payload.newTaskIds;
         }
       });
+      const currentTaskId = resolveCurrentTaskId(
+        projects,
+        state.pomodoroState.currentTaskId,
+        state.activeProjectId
+      );
       return {
         ...state,
         projects,
+        pomodoroState: {
+          ...state.pomodoroState,
+          currentTaskId,
+        },
       };
     }
 
@@ -526,8 +535,8 @@ export function AppProvider({ children }) {
     deleteTask: (projectId, taskId) => dispatch({ type: ACTIONS.DELETE_TASK, payload: { projectId, taskId } }),
     moveTask: (projectId, taskId, targetColumnId) =>
       dispatch({ type: ACTIONS.MOVE_TASK, payload: { projectId, taskId, targetColumnId } }),
-    reorderTasks: (projectId, columnId, taskIds) =>
-      dispatch({ type: ACTIONS.REORDER_TASKS, payload: { projectId, columnId, taskIds } }),
+    reorderTasks: (projectId, columnId, newTaskIds) =>
+      dispatch({ type: ACTIONS.REORDER_TASKS, payload: { projectId, columnId, newTaskIds } }),
 
     // Column actions
     addColumn: (projectId, column) => dispatch({ type: ACTIONS.ADD_COLUMN, payload: { projectId, column } }),

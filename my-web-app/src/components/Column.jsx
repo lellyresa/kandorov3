@@ -101,7 +101,7 @@ export default function Column({ column, tasks, projectId }) {
       <div
         ref={setNodeRef}
         className={`flex-1 overflow-y-auto ${isActiveColumn ? 'px-4 pb-4 pt-2' : 'p-4'} transition-colors duration-200 relative ${
-          isOver ? 'bg-accent-500/10 border-2 border-accent-500/30 border-dashed' : ''
+          isOver ? 'bg-accent-500/5' : ''
         }`}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>

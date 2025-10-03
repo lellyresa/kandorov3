@@ -154,29 +154,12 @@ export class Project {
     const task = this.getTaskById(taskId);
     if (!task) return;
 
-    // Find current column
-    const currentColumn = this.columns.find(col => col.taskIds.includes(taskId));
+    // Remove from current column
+    this.columns.forEach(col => col.removeTask(taskId));
+
+    // Add to target column
     const targetColumn = this.getColumnById(targetColumnId);
-
-    if (!targetColumn) return;
-
-    if (currentColumn && currentColumn.id === targetColumn.id) {
-      // Reordering within the same column - reorder the taskIds array
-      const currentIndex = currentColumn.taskIds.indexOf(taskId);
-      if (currentIndex !== -1) {
-        // For now, just ensure the task stays in the column
-        // The visual reordering is handled by useSortable
-        // We'll need to implement proper reordering logic
-        return;
-      }
-    } else {
-      // Moving to a different column
-      // Remove from current column
-      if (currentColumn) {
-        currentColumn.removeTask(taskId);
-      }
-
-      // Add to target column
+    if (targetColumn) {
       targetColumn.addTask(taskId);
       task.status = targetColumn.type === COLUMN_TYPES.ACTIVE ? TASK_STATUS.IN_PROGRESS : TASK_STATUS.TODO;
     }
