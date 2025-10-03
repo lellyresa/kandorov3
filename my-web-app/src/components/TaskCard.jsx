@@ -118,24 +118,68 @@ export default function TaskCard({
       }`}
     >
       <div className="p-4">
-        {/* Priority Indicator and Title Row */}
+        {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-2 flex-1">
+          {/* Title - Top Left */}
+          <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+            <h4 className="font-medium text-white leading-tight">
+              {task.title}
+            </h4>
+          </div>
+
+          {/* Chevron - Top Right */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent opening modal when clicking expand
+              handleCardClick();
+            }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            className="p-1 text-gray-400 hover:text-accent-400 transition-colors ml-2"
+            title="Open task details"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Task Content */}
+        {showDescription && task.description && (
+          <div className="mb-3" onClick={(e) => e.stopPropagation()}>
+            <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">
+              {task.description}
+            </p>
+          </div>
+        )}
+
+        {/* Bottom Row */}
+        <div className="flex items-center justify-between text-xs">
+          {/* Priority and Due Date - Bottom Left */}
+          <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
             {/* Priority Dot */}
-            <div
-              className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`}
-              title={`Priority: ${task.priority || 'medium'}`}
-            />
-            {/* Title */}
-            <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
-              <h4 className="font-medium text-white leading-tight">
-                {task.title}
-              </h4>
+            <div className="flex items-center space-x-1">
+              <div
+                className={`w-2.5 h-2.5 rounded-full ${getPriorityColor(task.priority)}`}
+                title={`Priority: ${task.priority || 'medium'}`}
+              />
+            </div>
+
+            {/* Due Date */}
+            <div className="flex items-center space-x-1 text-gray-400">
+              <Calendar className="w-3 h-3" />
+              <span>
+                {formatDueDate(task.dueDate) || 'No due date'}
+              </span>
             </div>
           </div>
 
-          {/* Timer and Expand Icon - Top Right */}
-          <div className="flex items-center space-x-2">
+          {/* Timer and Status - Bottom Right */}
+          <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
             {showFocusToggle && (
               <button
                 onClick={(e) => {
@@ -160,64 +204,16 @@ export default function TaskCard({
                 )}
               </button>
             )}
+
             <div
               className={`px-2 py-1 rounded-lg text-xs font-mono ${
                 isFocusTask
                   ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
                   : 'bg-gray-800/60 text-gray-300'
               }`}
-              onClick={(e) => e.stopPropagation()}
             >
               {formatWorkTime(task.workSeconds)}
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent opening modal when clicking expand
-                handleCardClick();
-              }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              className="p-1 text-gray-400 hover:text-accent-400 transition-colors"
-              title="Open task details"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Task Content */}
-        {showDescription && task.description && (
-          <div className="mb-3" onClick={(e) => e.stopPropagation()}>
-            <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">
-              {task.description}
-            </p>
-          </div>
-        )}
-
-        {/* Bottom Row */}
-        <div className="flex items-center justify-between text-xs">
-          {/* Due Date - Bottom Left */}
-          <div className="flex items-center space-x-1 text-gray-400" onClick={(e) => e.stopPropagation()}>
-            <Calendar className="w-3 h-3" />
-            <span>
-              {formatDueDate(task.dueDate) || 'No due date'}
-            </span>
-          </div>
-
-          {/* Task Metadata - Bottom Right */}
-          <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
-            {task.pomodoroCount > 0 && (
-              <div className="flex items-center space-x-1">
-                <Clock className="w-3 h-3 text-accent-400" />
-                <span className="text-accent-400">{task.pomodoroCount}</span>
-              </div>
-            )}
 
             {task.status === 'done' && (
               <div className="flex items-center space-x-1 text-success-400">
