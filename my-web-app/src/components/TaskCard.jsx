@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Clock, CheckCircle, Circle, CircleDot } from 'lucide-react';
+import { Clock, CheckCircle, Circle, CircleDot, ChevronRight, Calendar } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function TaskCard({
@@ -52,6 +52,25 @@ export default function TaskCard({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const formatDueDate = (dueDate) => {
+    if (!dueDate) return null;
+
+    const now = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return `Overdue by ${Math.abs(diffDays)} days`;
+    } else if (diffDays === 0) {
+      return 'Due today';
+    } else if (diffDays === 1) {
+      return 'Due tomorrow';
+    } else {
+      return `Due in ${diffDays} days`;
+    }
+  };
+
   const handleCardClick = () => {
     if (project) {
       actions.openTaskModal(task, project.id);
@@ -83,19 +102,17 @@ export default function TaskCard({
       onClick={handleCardClick}
     >
       <div className="p-4">
-        {/* Drag Handle */}
+        {/* Top Row */}
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div
-              {...attributes}
-              {...listeners}
-              className="p-1 text-gray-400 hover:text-accent-400 cursor-grab active:cursor-grabbing rounded hover:bg-gray-700/50 transition-colors"
-            >
-              <GripVertical className="w-4 h-4" />
-            </div>
+          {/* Title - Top Left */}
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium text-white leading-tight">
+              {task.title}
+            </h4>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Timer and Expand Icon - Top Right */}
+          <div className="flex items-center space-x-2 ml-3">
             {showFocusToggle && (
               <button
                 onClick={(e) => {
@@ -125,33 +142,46 @@ export default function TaskCard({
             >
               {formatWorkTime(task.workSeconds)}
             </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent opening modal when clicking expand
+                handleCardClick();
+              }}
+              className="p-1 text-gray-400 hover:text-accent-400 transition-colors"
+              title="Open task details"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
         {/* Task Content */}
-        <div>
-          <h4 className="font-medium text-white mb-2 leading-tight">
-            {task.title}
-          </h4>
-          {task.description && (
-            <p className="text-sm text-gray-300 mb-3 leading-relaxed line-clamp-3">
+        {task.description && (
+          <div className="mb-3">
+            <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">
               {task.description}
             </p>
-          )}
+          </div>
+        )}
 
-          {/* Task Metadata */}
-          <div className="flex items-center justify-between text-xs text-gray-400">
-            <div className="flex items-center space-x-3">
-              {task.pomodoroCount > 0 && (
-                <div className="flex items-center space-x-1">
-                  <Clock className="w-3 h-3 text-accent-400" />
-                  <span className="text-accent-400">{task.pomodoroCount}</span>
-                </div>
-              )}
-              <span className="text-gray-500">
-                {new Date(task.createdAt).toLocaleDateString()}
-              </span>
-            </div>
+        {/* Bottom Row */}
+        <div className="flex items-center justify-between text-xs">
+          {/* Due Date - Bottom Left */}
+          <div className="flex items-center space-x-1 text-gray-400">
+            <Calendar className="w-3 h-3" />
+            <span>
+              {formatDueDate(task.dueDate) || 'No due date'}
+            </span>
+          </div>
+
+          {/* Task Metadata - Bottom Right */}
+          <div className="flex items-center space-x-3">
+            {task.pomodoroCount > 0 && (
+              <div className="flex items-center space-x-1">
+                <Clock className="w-3 h-3 text-accent-400" />
+                <span className="text-accent-400">{task.pomodoroCount}</span>
+              </div>
+            )}
 
             {task.status === 'done' && (
               <div className="flex items-center space-x-1 text-success-400">

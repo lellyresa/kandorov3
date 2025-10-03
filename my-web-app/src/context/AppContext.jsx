@@ -57,7 +57,9 @@ const cloneTask = (task) => {
     task.status,
     task.pomodoroCount,
     task.workSeconds ?? 0,
-    toDate(task.createdAt)
+    task.priority ?? 'medium',
+    toDate(task.createdAt),
+    task.dueDate ? toDate(task.dueDate) : null
   );
   clonedTask.updatedAt = toDate(task.updatedAt ?? task.createdAt);
   return clonedTask;
@@ -427,7 +429,9 @@ export function AppProvider({ children }) {
                 taskData.status,
                 taskData.pomodoroCount,
                 taskData.workSeconds ?? 0,
-                taskData.createdAt
+                taskData.priority ?? 'medium',
+                taskData.createdAt,
+                taskData.dueDate
               )
             );
           }
@@ -482,7 +486,7 @@ export function AppProvider({ children }) {
     // Add sample tasks
     const tasks = [
       new Task('task-1', 'Set up project structure', 'Initialize the Kanban-Pomodoro app'),
-      new Task('task-2', 'Design user interface', 'Create modern, clean UI components'),
+      new Task('task-2', 'Design user interface', 'Create modern, clean UI components', TASK_STATUS.TODO, 0, 0, 'medium', new Date(), new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)), // Due in 2 days
       new Task('task-3', 'Implement drag and drop', 'Add task movement functionality'),
     ];
 
