@@ -153,7 +153,7 @@ export default function TaskCard({
             className="p-1 text-gray-400 hover:text-accent-400 transition-colors ml-2"
             title="Open task details"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 transition-transform duration-200 hover:rotate-90" />
           </button>
         </div>
 
