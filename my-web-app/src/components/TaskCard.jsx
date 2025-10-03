@@ -66,13 +66,13 @@ export default function TaskCard({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return `Overdue by ${Math.abs(diffDays)} days`;
+      return `${Math.abs(diffDays)} days overdue`;
     } else if (diffDays === 0) {
-      return 'Due today';
+      return 'Today';
     } else if (diffDays === 1) {
-      return 'Due tomorrow';
+      return 'Tomorrow';
     } else {
-      return `Due in ${diffDays} days`;
+      return `${diffDays} days`;
     }
   };
 
