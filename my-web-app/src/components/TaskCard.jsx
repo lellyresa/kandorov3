@@ -113,7 +113,7 @@ export default function TaskCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] ${
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] relative ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
@@ -159,22 +159,11 @@ export default function TaskCard({
 
         {/* Bottom Row */}
         <div className="flex items-center justify-between text-xs">
-          {/* Priority and Due Date - Bottom Left */}
-          <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
-            {/* Priority Dot */}
-            <div className="flex items-center space-x-1">
-              <div
-                className={`w-2.5 h-2.5 rounded-full ${getPriorityColor(task.priority)}`}
-                title={`Priority: ${task.priority || 'medium'}`}
-              />
-            </div>
-
-            {/* Due Date */}
-            <div className="flex items-center space-x-1 text-gray-400">
-              <span>
-                {formatDueDate(task.dueDate) || 'No due date'}
-              </span>
-            </div>
+          {/* Due Date - Bottom Left */}
+          <div className="flex items-center space-x-1 text-gray-400" onClick={(e) => e.stopPropagation()}>
+            <span>
+              {formatDueDate(task.dueDate) || 'No due date'}
+            </span>
           </div>
 
           {/* Timer and Status - Bottom Right */}
@@ -222,6 +211,16 @@ export default function TaskCard({
             )}
           </div>
         </div>
+
+        {/* Priority Corner Indicator */}
+        <div
+          className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
+          style={{
+            clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+            pointerEvents: 'none',
+          }}
+          title={`Priority: ${task.priority || 'medium'}`}
+        />
       </div>
     </div>
   );
