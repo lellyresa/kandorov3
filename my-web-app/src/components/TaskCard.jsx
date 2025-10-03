@@ -31,6 +31,10 @@ export default function TaskCard({
       type: 'task',
       task,
       columnId,
+    },
+    activationConstraint: {
+      delay: 250,
+      distance: 8,
     }
   });
 
@@ -149,8 +153,17 @@ export default function TaskCard({
             </div>
             <button
               onClick={(e) => {
-                e.stopPropagation(); // Prevent drag behavior when opening modal
+                e.stopPropagation();
+                e.preventDefault();
                 handleCardClick();
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
               }}
               className="p-1 text-gray-400 hover:text-accent-400 transition-colors"
               title="Open task details"
