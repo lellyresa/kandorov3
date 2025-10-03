@@ -101,9 +101,9 @@ export default function TaskCard({
       >
         {/* Priority Corner Cap */}
         <div
-          className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
+          className={`absolute bottom-0 left-0 w-8 h-8 ${getPriorityColor(task.priority)}`}
           style={{
-            clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+            clipPath: 'polygon(0 0, 100% 0, 0 100%, 0 75%)',
             pointerEvents: 'none',
           }}
           title={`Priority: ${task.priority || 'medium'}`}
@@ -128,9 +128,9 @@ export default function TaskCard({
     >
       {/* Priority Corner Cap */}
       <div
-        className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
+        className={`absolute bottom-0 left-0 w-8 h-8 ${getPriorityColor(task.priority)}`}
         style={{
-          clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+          clipPath: 'polygon(0 0, 100% 0, 0 100%, 0 75%)',
           pointerEvents: 'none',
         }}
         title={`Priority: ${task.priority || 'medium'}`}
