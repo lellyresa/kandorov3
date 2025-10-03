@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DndContext, DragOverlay, closestCorners, pointerWithin } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, pointerWithin, rectIntersection } from '@dnd-kit/core';
 import Column from './Column';
 import ColumnForm from './ColumnForm';
 import TaskCard from './TaskCard';
@@ -160,7 +160,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
       {/* Kanban Board */}
       <DndContext
-        collisionDetection={pointerWithin}
+        collisionDetection={rectIntersection}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

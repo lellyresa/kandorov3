@@ -99,10 +99,10 @@ export default function TaskCard({
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{ ...style, zIndex: 1 }}
       {...attributes}
       {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02] ${
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02] relative ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
