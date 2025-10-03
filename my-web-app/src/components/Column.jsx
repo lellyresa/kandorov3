@@ -4,7 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import TaskCard from './TaskCard';
 import PomodoroTimer from './PomodoroTimer';
 import { COLUMN_TYPES } from '../types';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, MoreVertical } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Column({ column, tasks, projectId }) {
@@ -54,6 +54,26 @@ export default function Column({ column, tasks, projectId }) {
     }
   };
 
+  const menuRef = React.useRef(null);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const onDocClick = (e) => {
+      if (!menuRef.current) return;
+      if (menuRef.current.contains(e.target)) return;
+      setMenuOpen(false);
+    };
+    if (menuOpen) {
+      document.addEventListener('mousedown', onDocClick);
+    }
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [menuOpen]);
+
+  const handleArchiveAllTasks = () => {
+    alert('Archive All Tasks is not implemented yet.');
+    setMenuOpen(false);
+  };
+
   const handleDeleteTask = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       actions.deleteTask(projectId, taskId);
@@ -76,7 +96,7 @@ export default function Column({ column, tasks, projectId }) {
         </div>
       ) : (
         <div className="p-4 border-b border-gray-700/40">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between group/header relative">
             <div className="flex items-center space-x-2">
               {isEditingTitle ? (
                 <input
@@ -116,14 +136,53 @@ export default function Column({ column, tasks, projectId }) {
               >
                 <Plus className="w-4 h-4" />
               </button>
-              {/* Edit icon removed; title is now editable by clicking it */}
-              <button
-                onClick={handleDeleteColumn}
-                className="p-1.5 text-gray-400 hover:text-danger-400 rounded-md hover:bg-danger-500/20 transition-colors"
-                title="Delete column"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+
+              {/* Kebab menu - shown on hover or when open */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen((v) => !v)}
+                  className={`p-1.5 rounded-md transition-all text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 ${
+                    menuOpen ? 'opacity-100' : 'opacity-0 group-hover/header:opacity-100'
+                  }`}
+                  title="More"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+
+                {menuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 mt-2 w-44 modern-card shadow-dark-medium py-1 z-20"
+                  >
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setIsEditingTitle(true);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-800/60 transition-colors"
+                      role="menuitem"
+                    >
+                      Rename Column
+                    </button>
+                    <button
+                      onClick={handleDeleteColumn}
+                      className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-danger-500/20 hover:text-red-300 transition-colors"
+                      role="menuitem"
+                    >
+                      Delete Column
+                    </button>
+                    <button
+                      onClick={handleArchiveAllTasks}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-800/60 transition-colors"
+                      role="menuitem"
+                    >
+                      Archive All Tasks
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
