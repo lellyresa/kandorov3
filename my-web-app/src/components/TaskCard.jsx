@@ -128,7 +128,7 @@ export default function TaskCard({
       />
       <div className="p-4">
         {/* Clean Top Row */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-6">
           {/* Title - Top Left */}
           <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
             <h4 className="font-medium text-white leading-tight">
