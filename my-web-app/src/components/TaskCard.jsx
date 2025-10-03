@@ -60,20 +60,37 @@ export default function TaskCard({
   const formatDueDate = (dueDate) => {
     if (!dueDate) return null;
 
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
     const now = new Date();
     const due = new Date(dueDate);
-    const diffTime = due - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+    // Normalize to midnight to compare by calendar day
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDue = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diffDays = Math.round((startOfDue - startOfToday) / msPerDay);
+
+    // 1) Overdue
     if (diffDays < 0) {
-      return `${Math.abs(diffDays)} days overdue`;
-    } else if (diffDays === 0) {
-      return 'Today';
-    } else if (diffDays === 1) {
-      return 'Tomorrow';
-    } else {
-      return `${diffDays} days`;
+      const past = Math.abs(diffDays);
+      return past === 1 ? '1 day ago' : `${past} days ago`;
     }
+
+    // 2) Today
+    if (diffDays === 0) return 'Today';
+
+    // 3) Tomorrow
+    if (diffDays === 1) return 'Tomorrow';
+
+    // 4) 2-7 days away
+    if (diffDays >= 2 && diffDays <= 7) {
+      return `in ${diffDays} days`;
+    }
+
+    // 5) 8+ days away → Month abbreviation + day number
+    return `${months[startOfDue.getMonth()]} ${startOfDue.getDate()}`;
   };
 
   const getPriorityBorderHex = (priority) => {
