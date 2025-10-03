@@ -76,13 +76,16 @@ export default function TaskCard({
     }
   };
 
-  const getPriorityColor = (priority) => {
-    const priorityLevel = priority?.toLowerCase() || 'medium';
-    switch (priorityLevel) {
-      case 'low': return 'bg-green-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'high': return 'bg-red-500';
-      default: return 'bg-gray-500';
+  const getPriorityBorderHex = (priority) => {
+    const level = (priority || 'medium').toLowerCase();
+    switch (level) {
+      case 'high':
+        return '#FF6B6B'; // red
+      case 'low':
+        return '#4ADE80'; // green
+      case 'medium':
+      default:
+        return '#FFC107'; // yellow
     }
   };
 
@@ -113,10 +116,16 @@ export default function TaskCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] ${
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] relative overflow-hidden ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
+      {/* Priority left border */}
+      <div
+        className="absolute left-0 top-0 bottom-0 rounded-l-lg"
+        style={{ width: '4px', backgroundColor: getPriorityBorderHex(task.priority) }}
+        aria-hidden="true"
+      />
       <div className="p-4">
         {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-3">
@@ -161,14 +170,6 @@ export default function TaskCard({
         <div className="flex items-center justify-between text-xs">
           {/* Priority and Due Date - Bottom Left */}
           <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
-            {/* Priority Dot */}
-            <div className="flex items-center space-x-1">
-              <div
-                className={`w-2.5 h-2.5 rounded-full ${getPriorityColor(task.priority)}`}
-                title={`Priority: ${task.priority || 'medium'}`}
-              />
-            </div>
-
             {/* Due Date */}
             <div className="flex items-center space-x-1 text-gray-400">
               <span>
