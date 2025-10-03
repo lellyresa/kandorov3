@@ -13,9 +13,9 @@ export default function TaskCard({
 }) {
   const { state, actions } = useApp();
 
-  // Find the project that contains this column
+  // Find the project that contains this task
   const project = state.projects.find(p =>
-    p.columns.some(col => col.id === columnId)
+    p.tasks.some(t => t.id === task.id)
   );
 
   const {
@@ -33,8 +33,8 @@ export default function TaskCard({
       columnId,
     },
     activationConstraint: {
-      delay: 250,
-      distance: 8,
+      delay: 200,
+      distance: 5,
     }
   });
 
@@ -76,11 +76,8 @@ export default function TaskCard({
   };
 
   const handleCardClick = () => {
-    if (project && columnId) {
-      actions.openTaskModal(task, project.id, columnId);
-    } else if (state.activeProjectId) {
-      // Fallback to active project if column project not found
-      actions.openTaskModal(task, state.activeProjectId, columnId);
+    if (project) {
+      actions.openTaskModal(task, project.id);
     }
   };
 
@@ -91,7 +88,16 @@ export default function TaskCard({
         style={style}
         className="modern-card border-2 border-accent-500/50 border-dashed opacity-60 p-4 shadow-dark-large"
       >
-        <div className="animate-pulse">
+        {/* Drag Handle - covers entire card except chevron area */}
+        <div
+          {...listeners}
+          className="absolute inset-0 cursor-grab active:cursor-grabbing"
+          style={{
+            zIndex: 1,
+          }}
+          onClick={(e) => e.preventDefault()}
+        />
+        <div className="p-4 relative animate-pulse" style={{ zIndex: 2 }}>
           <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
           <div className="h-3 bg-gray-600/30 rounded w-3/4"></div>
         </div>
@@ -104,23 +110,31 @@ export default function TaskCard({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02] ${
+      className={`modern-card modern-card-hover group transition-transform hover:scale-[1.02] ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
-      <div className="p-4">
+      {/* Drag Handle - covers entire card except chevron area */}
+      <div
+        {...listeners}
+        className="absolute inset-0 cursor-grab active:cursor-grabbing"
+        style={{
+          zIndex: 1,
+        }}
+        onClick={(e) => e.preventDefault()}
+      />
+      <div className="p-4 relative" style={{ zIndex: 2 }}>
         {/* Top Row */}
         <div className="flex items-start justify-between mb-3">
           {/* Title - Top Left */}
-          <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+          <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()} style={{ pointerEvents: 'auto' }}>
             <h4 className="font-medium text-white leading-tight">
               {task.title}
             </h4>
           </div>
 
           {/* Timer and Expand Icon - Top Right */}
-          <div className="flex items-center space-x-2 ml-3">
+          <div className="flex items-center space-x-2 ml-3" style={{ pointerEvents: 'auto', position: 'relative', zIndex: 3 }}>
             {showFocusToggle && (
               <button
                 onClick={(e) => {
@@ -153,8 +167,7 @@ export default function TaskCard({
             </div>
             <button
               onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
+                e.stopPropagation(); // Prevent opening modal when clicking expand
                 handleCardClick();
               }}
               onMouseDown={(e) => {
@@ -175,7 +188,7 @@ export default function TaskCard({
 
         {/* Task Content */}
         {task.description && (
-          <div className="mb-3" onClick={(e) => e.stopPropagation()}>
+          <div className="mb-3" onClick={(e) => e.stopPropagation()} style={{ pointerEvents: 'auto' }}>
             <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">
               {task.description}
             </p>
@@ -183,7 +196,7 @@ export default function TaskCard({
         )}
 
         {/* Bottom Row */}
-        <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center justify-between text-xs" style={{ pointerEvents: 'auto' }}>
           {/* Due Date - Bottom Left */}
           <div className="flex items-center space-x-1 text-gray-400" onClick={(e) => e.stopPropagation()}>
             <Calendar className="w-3 h-3" />
