@@ -205,7 +205,7 @@ export default function TaskCard({
             )}
 
             <div
-              className={`px-2 py-1 rounded-lg text-xs font-mono ${
+              className={`px-3 py-1.5 rounded-full text-xs font-mono ${
                 isFocusTask
                   ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
                   : 'bg-gray-800/60 text-gray-300'
