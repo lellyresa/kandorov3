@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DndContext, DragOverlay, closestCorners, pointerWithin, rectIntersection } from '@dnd-kit/core';
+import { DndContext, DragOverlay, pointerWithin, rectIntersection } from '@dnd-kit/core';
 import Column from './Column';
 import ColumnForm from './ColumnForm';
 import TaskCard from './TaskCard';
@@ -88,12 +88,24 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
     if (!over) return;
 
     const taskId = active.id;
-    const targetColumnId = over.id;
+    const overId = over.id;
+    const overData = over.data.current;
 
-    // Check if we're dropping on a column (not another task)
-    const targetColumn = activeProject.getColumnById(targetColumnId);
-    if (targetColumn) {
-      actions.moveTask(activeProject.id, taskId, targetColumnId);
+    // Handle different types of drop targets
+    if (overData?.type === 'column') {
+      // Dropping directly on a column
+      const targetColumnId = overId;
+      const targetColumn = activeProject.getColumnById(targetColumnId);
+      if (targetColumn) {
+        actions.moveTask(activeProject.id, taskId, targetColumnId);
+      }
+    } else if (overData?.type === 'dropZone') {
+      // Dropping on a specific drop zone within a column
+      const targetColumnId = overData.columnId;
+      const targetColumn = activeProject.getColumnById(targetColumnId);
+      if (targetColumn) {
+        actions.moveTask(activeProject.id, taskId, targetColumnId);
+      }
     }
   };
 
