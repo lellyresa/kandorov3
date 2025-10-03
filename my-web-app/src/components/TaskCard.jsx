@@ -123,7 +123,7 @@ export default function TaskCard({
       {/* Priority left border */}
       <div
         className="absolute left-0 top-0 bottom-0 rounded-l-lg"
-        style={{ width: '4px', backgroundColor: getPriorityBorderHex(task.priority) }}
+        style={{ width: '3px', backgroundColor: getPriorityBorderHex(task.priority) }}
         aria-hidden="true"
       />
       <div className="p-4">
