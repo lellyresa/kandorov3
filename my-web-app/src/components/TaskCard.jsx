@@ -96,6 +96,17 @@ export default function TaskCard({
     }
   };
 
+  const getPriorityRgb = (priority) => {
+    const priorityLevel = priority?.toLowerCase() || 'medium';
+    switch (priorityLevel) {
+      // Tailwind 500 scale approximations
+      case 'low': return { r: 34, g: 197, b: 94 };     // green-500
+      case 'medium': return { r: 234, g: 179, b: 8 };  // yellow-500
+      case 'high': return { r: 239, g: 68, b: 68 };    // red-500
+      default: return { r: 100, g: 116, b: 139 };      // slate-500
+    }
+  };
+
   const handleCardClick = () => {
     if (project) {
       actions.openTaskModal(task, project.id);
@@ -123,26 +134,19 @@ export default function TaskCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] relative ${
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] relative overflow-hidden ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
-      {/* Priority Corner Sweep (organic to match rounded corner) */}
+      {/* Priority Corner Sweep (CSS radial gradient) */}
       <div
-        className="absolute bottom-0 left-0 w-10 h-10 pointer-events-none"
+        className="absolute bottom-0 left-0 w-12 h-12 rounded-bl-xl pointer-events-none"
         aria-hidden="true"
-      >
-        <svg width="100%" height="100%" viewBox="0 0 40 40" className="block">
-          <defs>
-            <radialGradient id="cornerGlow" cx="0" cy="40" r="40">
-              <stop offset="0%" className={`${getPriorityTextColor(task.priority)}`} stopOpacity="0.28" />
-              <stop offset="70%" stopColor="transparent" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          {/* Sweeping shape that follows the rounded corner */}
-          <path d="M0,40 C0,18 18,0 40,0 L40,0 L0,0 Z" fill="url(#cornerGlow)" />
-        </svg>
-      </div>
+        style={{
+          background: `radial-gradient(120% 120% at 0% 100%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.45) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.20) 45%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0) 75%)`,
+          zIndex: 0,
+        }}
+      />
       <div className="p-4">
         {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-3">
