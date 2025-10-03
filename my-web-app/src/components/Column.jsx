@@ -4,7 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import TaskCard from './TaskCard';
 import PomodoroTimer from './PomodoroTimer';
 import { COLUMN_TYPES } from '../types';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Column({ column, tasks, projectId }) {
@@ -27,8 +27,25 @@ export default function Column({ column, tasks, projectId }) {
     actions.openTaskModal(null, projectId, column.id, 'create');
   };
 
-  const handleEditColumn = () => {
-    console.log('Edit column:', column);
+  const [isEditingTitle, setIsEditingTitle] = React.useState(false);
+  const [pendingTitle, setPendingTitle] = React.useState(column.title);
+
+  const startEditTitle = () => {
+    setPendingTitle(column.title);
+    setIsEditingTitle(true);
+  };
+
+  const commitTitle = () => {
+    const title = (pendingTitle || '').trim();
+    if (title && title !== column.title) {
+      actions.updateColumn(projectId, { ...column, title });
+    }
+    setIsEditingTitle(false);
+  };
+
+  const cancelTitle = () => {
+    setIsEditingTitle(false);
+    setPendingTitle(column.title);
   };
 
   const handleDeleteColumn = () => {
@@ -61,7 +78,28 @@ export default function Column({ column, tasks, projectId }) {
         <div className="p-4 border-b border-gray-700/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <h3 className="font-semibold text-white">{column.title}</h3>
+              {isEditingTitle ? (
+                <input
+                  type="text"
+                  value={pendingTitle}
+                  onChange={(e) => setPendingTitle(e.target.value)}
+                  onBlur={commitTitle}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitTitle();
+                    if (e.key === 'Escape') cancelTitle();
+                  }}
+                  className="bg-transparent border border-gray-600/50 rounded px-2 py-1 text-white text-sm focus:outline-none focus:border-accent-500/60"
+                  autoFocus
+                />
+              ) : (
+                <h3
+                  className="font-semibold text-white cursor-text hover:text-accent-200 transition-colors"
+                  onClick={startEditTitle}
+                  title="Click to rename column"
+                >
+                  {column.title}
+                </h3>
+              )}
               <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-700/60 text-gray-300">
                 {tasks.length}
               </span>
@@ -75,13 +113,7 @@ export default function Column({ column, tasks, projectId }) {
               >
                 <Plus className="w-4 h-4" />
               </button>
-              <button
-                onClick={handleEditColumn}
-                className="p-1.5 text-gray-400 hover:text-accent-400 rounded-md hover:bg-gray-700/50 transition-colors"
-                title="Edit column"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
+              {/* Edit icon removed; title is now editable by clicking it */}
               <button
                 onClick={handleDeleteColumn}
                 className="p-1.5 text-gray-400 hover:text-danger-400 rounded-md hover:bg-danger-500/20 transition-colors"
