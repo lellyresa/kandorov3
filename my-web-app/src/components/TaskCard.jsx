@@ -96,16 +96,17 @@ export default function TaskCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`modern-card modern-card-hover group cursor-pointer transition-transform hover:scale-[1.02] ${
+      {...attributes}
+      {...listeners}
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02] ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
-      onClick={handleCardClick}
     >
       <div className="p-4">
         {/* Top Row */}
         <div className="flex items-start justify-between mb-3">
           {/* Title - Top Left */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
             <h4 className="font-medium text-white leading-tight">
               {task.title}
             </h4>
@@ -139,6 +140,7 @@ export default function TaskCard({
                   ? 'bg-accent-500/20 text-accent-100 border border-accent-500/40'
                   : 'bg-gray-800/60 text-gray-300'
               }`}
+              onClick={(e) => e.stopPropagation()}
             >
               {formatWorkTime(task.workSeconds)}
             </div>
@@ -157,7 +159,7 @@ export default function TaskCard({
 
         {/* Task Content */}
         {task.description && (
-          <div className="mb-3">
+          <div className="mb-3" onClick={(e) => e.stopPropagation()}>
             <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">
               {task.description}
             </p>
@@ -167,7 +169,7 @@ export default function TaskCard({
         {/* Bottom Row */}
         <div className="flex items-center justify-between text-xs">
           {/* Due Date - Bottom Left */}
-          <div className="flex items-center space-x-1 text-gray-400">
+          <div className="flex items-center space-x-1 text-gray-400" onClick={(e) => e.stopPropagation()}>
             <Calendar className="w-3 h-3" />
             <span>
               {formatDueDate(task.dueDate) || 'No due date'}
@@ -175,7 +177,7 @@ export default function TaskCard({
           </div>
 
           {/* Task Metadata - Bottom Right */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
             {task.pomodoroCount > 0 && (
               <div className="flex items-center space-x-1">
                 <Clock className="w-3 h-3 text-accent-400" />
