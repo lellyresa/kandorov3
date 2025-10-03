@@ -80,9 +80,9 @@ export default function TaskCard({
     const level = (priority || 'medium').toLowerCase();
     switch (level) {
       case 'high':
-        return '#E56060'; // 10% darker red
+        return '#D24B4B'; // deeper, less vibrant red
       case 'low':
-        return '#43C873'; // 10% darker green
+        return '#2FA25B'; // deeper, less vibrant green
       case 'medium':
       default:
         return '#E5AE06'; // 10% darker yellow
