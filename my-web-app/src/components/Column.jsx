@@ -101,8 +101,8 @@ export default function Column({ column, tasks, projectId }) {
                 </h3>
               )}
               <span
-                className="px-2 py-1 text-xs font-medium rounded-full text-gray-300"
-                style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+                className="px-2.5 py-0.5 text-xs font-medium rounded-full text-gray-300 leading-none text-center inline-flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(255,255,255,0.08)', minWidth: '1.75rem' }}
               >
                 {tasks.length}
               </span>
