@@ -95,7 +95,7 @@ export default function Column({ column, tasks, projectId }) {
           <PomodoroTimer />
         </div>
       ) : (
-        <div className="p-4 border-b border-gray-700/40">
+        <div className="p-4 border-b border-gray-700/40 relative z-10">
           <div className="flex items-center justify-between group/header relative">
             <div className="flex items-center space-x-2">
               {isEditingTitle ? (
@@ -151,37 +151,52 @@ export default function Column({ column, tasks, projectId }) {
                   <MoreVertical className="w-4 h-4" />
                 </button>
 
-                {menuOpen && (
-                  <div
-                    role="menu"
-                    className="absolute right-0 mt-2 w-44 modern-card shadow-dark-medium py-1 z-20"
+                {/* Dropdown menu - always rendered for animations */}
+                <div
+                  role="menu"
+                  className={`absolute right-0 w-44 py-[6px] rounded-lg border z-50 transition-all duration-[150ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    menuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+                  }`}
+                  style={{
+                    top: 'calc(100% + 8px)',
+                    background: '#1E293B',
+                    backdropFilter: 'blur(12px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                    boxShadow:
+                      '0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
+                    borderColor: 'rgba(255,255,255,0.08)'
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setIsEditingTitle(true);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
+                    role="menuitem"
                   >
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setIsEditingTitle(true);
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-800/60 transition-colors"
-                      role="menuitem"
-                    >
-                      Rename Column
-                    </button>
-                    <button
-                      onClick={handleDeleteColumn}
-                      className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-danger-500/20 hover:text-red-300 transition-colors"
-                      role="menuitem"
-                    >
-                      Delete Column
-                    </button>
-                    <button
-                      onClick={handleArchiveAllTasks}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-800/60 transition-colors"
-                      role="menuitem"
-                    >
-                      Archive All Tasks
-                    </button>
-                  </div>
-                )}
+                    Rename Column
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleDeleteColumn();
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
+                    role="menuitem"
+                  >
+                    Delete Column
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleArchiveAllTasks();
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
+                    role="menuitem"
+                  >
+                    Archive All Tasks
+                  </button>
+                </div>
               </div>
             </div>
           </div>
