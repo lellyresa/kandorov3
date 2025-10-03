@@ -133,6 +133,7 @@ export default function Column({ column, tasks, projectId }) {
                   showFocusToggle={isActiveColumn}
                   isFocusTask={isActiveColumn && currentTaskId === task.id}
                   onSelectFocus={() => handleFocusTask(task.id)}
+                  showDescription={false}
                 />
               ))
             )}

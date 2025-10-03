@@ -218,7 +218,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
         <DragOverlay>
           {activeTask ? (
-            <TaskCard task={activeTask} columnId={null} />
+            <TaskCard task={activeTask} columnId={null} showDescription={false} />
           ) : null}
         </DragOverlay>
       </DndContext>

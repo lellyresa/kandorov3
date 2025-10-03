@@ -9,7 +9,8 @@ export default function TaskCard({
   columnId,
   showFocusToggle = false,
   isFocusTask = false,
-  onSelectFocus = () => {}
+  onSelectFocus = () => {},
+  showDescription = true
 }) {
   const { state, actions } = useApp();
 
@@ -174,7 +175,7 @@ export default function TaskCard({
         </div>
 
         {/* Task Content */}
-        {task.description && (
+        {showDescription && task.description && (
           <div className="mb-3" onClick={(e) => e.stopPropagation()}>
             <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">
               {task.description}
