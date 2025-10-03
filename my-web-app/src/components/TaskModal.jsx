@@ -193,7 +193,18 @@ export default function TaskModal() {
       setEditTitle('');
       setEditDescription('');
       setCurrentDueDate(null);
-      setCurrentTask(null);
+      // Initialize currentTask with default values for create mode
+      setCurrentTask({
+        id: '',
+        title: '',
+        description: '',
+        status: 'todo',
+        priority: 'medium',
+        createdAt: new Date().toISOString(),
+        workSeconds: 0,
+        pomodoroCount: 0,
+        dueDate: null,
+      });
     }
   }, [task, mode]);
 
@@ -238,10 +249,11 @@ export default function TaskModal() {
         title: editTitle.trim(),
         description: editDescription.trim(),
         status: 'todo',
-        priority: 'medium',
+        priority: currentTask.priority,
         createdAt: new Date().toISOString(),
         workSeconds: 0,
         pomodoroCount: 0,
+        dueDate: currentDueDate,
       };
 
       actions.addTask(projectId, newTask);
@@ -258,6 +270,8 @@ export default function TaskModal() {
         ...currentTask,
         title: editTitle.trim(),
         description: editDescription.trim(),
+        priority: currentTask.priority,
+        dueDate: currentDueDate,
       };
       setCurrentTask(updatedTask);
       actions.updateTask(projectId, updatedTask);
@@ -290,7 +304,10 @@ export default function TaskModal() {
       const updatedTask = { ...currentTask, priority };
       setCurrentTask(updatedTask);
 
-      actions.updateTask(projectId, updatedTask);
+      if (mode === 'edit') {
+        actions.updateTask(projectId, updatedTask);
+      }
+      // For create mode, we'll handle saving in handleSave
     }
   };
 
@@ -428,9 +445,11 @@ export default function TaskModal() {
                   value={currentDueDate}
                   onChange={(newDate) => {
                     setCurrentDueDate(newDate);
-                    const updatedTask = { ...currentTask, dueDate: newDate };
-                    setCurrentTask(updatedTask);
-                    actions.updateTask(projectId, updatedTask);
+                    if (currentTask) {
+                      const updatedTask = { ...currentTask, dueDate: newDate };
+                      setCurrentTask(updatedTask);
+                      actions.updateTask(projectId, updatedTask);
+                    }
                     setShowDatePicker(false);
                   }}
                   onClose={() => setShowDatePicker(false)}
