@@ -86,27 +86,6 @@ export default function TaskCard({
     }
   };
 
-  const getPriorityTextColor = (priority) => {
-    const priorityLevel = priority?.toLowerCase() || 'medium';
-    switch (priorityLevel) {
-      case 'low': return 'text-green-500';
-      case 'medium': return 'text-yellow-500';
-      case 'high': return 'text-red-500';
-      default: return 'text-gray-500';
-    }
-  };
-
-  const getPriorityRgb = (priority) => {
-    const priorityLevel = priority?.toLowerCase() || 'medium';
-    switch (priorityLevel) {
-      // Tailwind 500 scale approximations
-      case 'low': return { r: 34, g: 197, b: 94 };     // green-500
-      case 'medium': return { r: 234, g: 179, b: 8 };  // yellow-500
-      case 'high': return { r: 239, g: 68, b: 68 };    // red-500
-      default: return { r: 100, g: 116, b: 139 };      // slate-500
-    }
-  };
-
   const handleCardClick = () => {
     if (project) {
       actions.openTaskModal(task, project.id);
@@ -134,39 +113,10 @@ export default function TaskCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] relative overflow-hidden ${
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
-      {/* Priority Corner Sweep (CSS radial gradient) */}
-      <div
-        className="absolute bottom-0 left-0 w-6 h-6 rounded-bl-xl pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background: `radial-gradient(120% 120% at 0% 100%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.56) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.18) 40%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0) 60%)`,
-          zIndex: 0,
-          filter: 'brightness(1.25)'
-        }}
-      />
-      {/* Extended sweeps up the left edge and across the bottom (doubles perceived length) */}
-      <div
-        className="absolute bottom-0 left-0 w-1.5 h-12 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background: `linear-gradient(0deg, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.38) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.0) 90%)`,
-          zIndex: 0,
-          filter: 'brightness(1.25)'
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-0 h-1.5 w-12 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background: `linear-gradient(90deg, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.38) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.0) 90%)`,
-          zIndex: 0,
-          filter: 'brightness(1.25)'
-        }}
-      />
       <div className="p-4">
         {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-3">
@@ -209,11 +159,22 @@ export default function TaskCard({
 
         {/* Bottom Row */}
         <div className="flex items-center justify-between text-xs">
-          {/* Due Date - Bottom Left */}
-          <div className="flex items-center space-x-1 text-gray-400" onClick={(e) => e.stopPropagation()}>
-            <span>
-              {formatDueDate(task.dueDate) || 'No due date'}
-            </span>
+          {/* Priority and Due Date - Bottom Left */}
+          <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
+            {/* Priority Dot */}
+            <div className="flex items-center space-x-1">
+              <div
+                className={`w-2.5 h-2.5 rounded-full ${getPriorityColor(task.priority)}`}
+                title={`Priority: ${task.priority || 'medium'}`}
+              />
+            </div>
+
+            {/* Due Date */}
+            <div className="flex items-center space-x-1 text-gray-400">
+              <span>
+                {formatDueDate(task.dueDate) || 'No due date'}
+              </span>
+            </div>
           </div>
 
           {/* Timer and Status - Bottom Right */}

@@ -5,7 +5,7 @@ import Column from './Column';
 import ColumnForm from './ColumnForm';
 import TaskCard from './TaskCard';
 import { useApp } from '../context/AppContext';
-import { Plus, Save, X } from 'lucide-react';
+import { Plus, X, Check } from 'lucide-react';
 
 export default function KanbanBoard({ onCreateProject = () => {} }) {
   const { state, actions } = useApp();
@@ -146,20 +146,22 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
                   placeholder="Project description (optional)"
                   rows={2}
                 />
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <button
                     onClick={handleProjectSave}
-                    className="flex items-center space-x-2 px-3 py-2 bg-accent-600 hover:bg-accent-700 text-white text-sm rounded-lg transition-colors"
+                    className="p-2 rounded-lg bg-green-600/80 hover:bg-green-600 text-white transition-colors"
+                    title="Save"
+                    aria-label="Save"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>Save</span>
+                    <Check className="w-5 h-5" />
                   </button>
                   <button
                     onClick={handleProjectCancel}
-                    className="flex items-center space-x-2 px-3 py-2 text-gray-400 hover:text-gray-300 text-sm rounded-lg transition-colors"
+                    className="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 transition-colors"
+                    title="Cancel"
+                    aria-label="Cancel"
                   >
-                    <X className="w-4 h-4" />
-                    <span>Cancel</span>
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
