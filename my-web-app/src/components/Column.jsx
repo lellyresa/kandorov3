@@ -100,7 +100,10 @@ export default function Column({ column, tasks, projectId }) {
                   {column.title}
                 </h3>
               )}
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-700/60 text-gray-300">
+              <span
+                className="px-2 py-1 text-xs font-medium rounded-full text-gray-300"
+                style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+              >
                 {tasks.length}
               </span>
             </div>
