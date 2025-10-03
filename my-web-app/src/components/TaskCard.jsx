@@ -88,16 +88,7 @@ export default function TaskCard({
         style={style}
         className="modern-card border-2 border-accent-500/50 border-dashed opacity-60 p-4 shadow-dark-large"
       >
-        {/* Drag Handle - covers entire card except chevron area */}
-        <div
-          {...listeners}
-          className="absolute inset-0 cursor-grab active:cursor-grabbing"
-          style={{
-            zIndex: 1,
-          }}
-          onClick={(e) => e.preventDefault()}
-        />
-        <div className="p-4 relative animate-pulse" style={{ zIndex: 2 }}>
+        <div className="animate-pulse">
           <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
           <div className="h-3 bg-gray-600/30 rounded w-3/4"></div>
         </div>
@@ -110,36 +101,32 @@ export default function TaskCard({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className={`modern-card modern-card-hover group transition-transform hover:scale-[1.02] ${
+      {...listeners}
+      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02] ${
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
-      {/* Drag Handle - covers entire card except chevron area */}
-      <div
-        {...listeners}
-        className="absolute inset-0 cursor-grab active:cursor-grabbing"
-        style={{
-          zIndex: 1,
-        }}
-        onClick={(e) => e.preventDefault()}
-      />
-      <div className="p-4 relative" style={{ zIndex: 2 }}>
+      <div className="p-4">
         {/* Top Row */}
         <div className="flex items-start justify-between mb-3">
           {/* Title - Top Left */}
-          <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()} style={{ pointerEvents: 'auto' }}>
+          <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
             <h4 className="font-medium text-white leading-tight">
               {task.title}
             </h4>
           </div>
 
           {/* Timer and Expand Icon - Top Right */}
-          <div className="flex items-center space-x-2 ml-3" style={{ pointerEvents: 'auto', position: 'relative', zIndex: 3 }}>
+          <div className="flex items-center space-x-2 ml-3">
             {showFocusToggle && (
               <button
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent opening modal when clicking focus toggle
                   onSelectFocus();
+                }}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
                 }}
                 className={`p-1 rounded-full transition-colors ${
                   isFocusTask
@@ -170,7 +157,7 @@ export default function TaskCard({
                 e.stopPropagation(); // Prevent opening modal when clicking expand
                 handleCardClick();
               }}
-              onMouseDown={(e) => {
+              onPointerDown={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
               }}
@@ -188,7 +175,7 @@ export default function TaskCard({
 
         {/* Task Content */}
         {task.description && (
-          <div className="mb-3" onClick={(e) => e.stopPropagation()} style={{ pointerEvents: 'auto' }}>
+          <div className="mb-3" onClick={(e) => e.stopPropagation()}>
             <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">
               {task.description}
             </p>
@@ -196,7 +183,7 @@ export default function TaskCard({
         )}
 
         {/* Bottom Row */}
-        <div className="flex items-center justify-between text-xs" style={{ pointerEvents: 'auto' }}>
+        <div className="flex items-center justify-between text-xs">
           {/* Due Date - Bottom Left */}
           <div className="flex items-center space-x-1 text-gray-400" onClick={(e) => e.stopPropagation()}>
             <Calendar className="w-3 h-3" />
