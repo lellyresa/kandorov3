@@ -97,8 +97,17 @@ export default function TaskCard({
       <div
         ref={setNodeRef}
         style={style}
-        className="modern-card border-2 border-accent-500/60 border-solid opacity-80 p-4 shadow-dark-large transform rotate-3 scale-105"
+        className="modern-card border-2 border-accent-500/60 border-solid opacity-80 p-4 shadow-dark-large transform rotate-3 scale-105 relative"
       >
+        {/* Priority Corner Cap */}
+        <div
+          className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
+          style={{
+            clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+            pointerEvents: 'none',
+          }}
+          title={`Priority: ${task.priority || 'medium'}`}
+        />
         <div className="animate-pulse">
           <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
           <div className="h-3 bg-gray-600/30 rounded w-3/4"></div>
@@ -117,6 +126,15 @@ export default function TaskCard({
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
+      {/* Priority Corner Cap */}
+      <div
+        className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
+        style={{
+          clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+          pointerEvents: 'none',
+        }}
+        title={`Priority: ${task.priority || 'medium'}`}
+      />
       <div className="p-4">
         {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-3">
@@ -211,16 +229,6 @@ export default function TaskCard({
             )}
           </div>
         </div>
-
-        {/* Priority Corner Indicator */}
-        <div
-          className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
-          style={{
-            clipPath: 'polygon(0 0, 100% 0, 0 100%)',
-            pointerEvents: 'none',
-          }}
-          title={`Priority: ${task.priority || 'medium'}`}
-        />
       </div>
     </div>
   );
