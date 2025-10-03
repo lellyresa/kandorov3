@@ -76,6 +76,16 @@ export default function TaskCard({
     }
   };
 
+  const getPriorityColor = (priority) => {
+    const priorityLevel = priority?.toLowerCase() || 'medium';
+    switch (priorityLevel) {
+      case 'low': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'high': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   const handleCardClick = () => {
     if (project) {
       actions.openTaskModal(task, project.id);
@@ -108,17 +118,24 @@ export default function TaskCard({
       }`}
     >
       <div className="p-4">
-        {/* Top Row */}
+        {/* Priority Indicator and Title Row */}
         <div className="flex items-start justify-between mb-3">
-          {/* Title - Top Left */}
-          <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
-            <h4 className="font-medium text-white leading-tight">
-              {task.title}
-            </h4>
+          <div className="flex items-center space-x-2 flex-1">
+            {/* Priority Dot */}
+            <div
+              className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`}
+              title={`Priority: ${task.priority || 'medium'}`}
+            />
+            {/* Title */}
+            <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+              <h4 className="font-medium text-white leading-tight">
+                {task.title}
+              </h4>
+            </div>
           </div>
 
           {/* Timer and Expand Icon - Top Right */}
-          <div className="flex items-center space-x-2 ml-3">
+          <div className="flex items-center space-x-2">
             {showFocusToggle && (
               <button
                 onClick={(e) => {
