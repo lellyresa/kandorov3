@@ -86,6 +86,16 @@ export default function TaskCard({
     }
   };
 
+  const getPriorityTextColor = (priority) => {
+    const priorityLevel = priority?.toLowerCase() || 'medium';
+    switch (priorityLevel) {
+      case 'low': return 'text-green-500';
+      case 'medium': return 'text-yellow-500';
+      case 'high': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
+
   const handleCardClick = () => {
     if (project) {
       actions.openTaskModal(task, project.id);
@@ -117,15 +127,22 @@ export default function TaskCard({
         isFocusTask ? 'ring-2 ring-accent-500/40' : ''
       }`}
     >
-      {/* Priority Corner Highlight */}
+      {/* Priority Corner Sweep (organic to match rounded corner) */}
       <div
-        className={`absolute bottom-0 left-0 w-6 h-6 ${getPriorityColor(task.priority)}`}
-        style={{
-          clipPath: 'polygon(0 0, 100% 0, 0 100%)',
-          pointerEvents: 'none',
-        }}
-        title={`Priority: ${task.priority || 'medium'}`}
-      />
+        className="absolute bottom-0 left-0 w-10 h-10 pointer-events-none"
+        aria-hidden="true"
+      >
+        <svg width="100%" height="100%" viewBox="0 0 40 40" className="block">
+          <defs>
+            <radialGradient id="cornerGlow" cx="0" cy="40" r="40">
+              <stop offset="0%" className={`${getPriorityTextColor(task.priority)}`} stopOpacity="0.28" />
+              <stop offset="70%" stopColor="transparent" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          {/* Sweeping shape that follows the rounded corner */}
+          <path d="M0,40 C0,18 18,0 40,0 L40,0 L0,0 Z" fill="url(#cornerGlow)" />
+        </svg>
+      </div>
       <div className="p-4">
         {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-3">
