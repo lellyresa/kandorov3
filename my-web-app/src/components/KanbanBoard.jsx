@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { DndContext, DragOverlay, pointerWithin, rectIntersection } from '@dnd-kit/core';
+import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import Column from './Column';
 import ColumnForm from './ColumnForm';
 import TaskCard from './TaskCard';
@@ -72,15 +73,6 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
     }
   };
 
-  // Custom collision detection that combines pointerWithin and rectIntersection
-  const customCollisionDetection = (args) => {
-    const pointerCollisions = pointerWithin(args);
-    const rectCollisions = rectIntersection(args);
-
-    // Combine both results, preferring pointerWithin for more accurate detection
-    return [...new Set([...pointerCollisions, ...rectCollisions])];
-  };
-
   const handleDragEnd = (event) => {
     const { active, over } = event;
     setActiveTask(null);
@@ -89,22 +81,44 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
     const taskId = active.id;
     const overId = over.id;
-    const overData = over.data.current;
 
-    // Handle different types of drop targets
-    if (overData?.type === 'column') {
-      // Dropping directly on a column
-      const targetColumnId = overId;
-      const targetColumn = activeProject.getColumnById(targetColumnId);
-      if (targetColumn) {
-        actions.moveTask(activeProject.id, taskId, targetColumnId);
+    // Find the source column (where the task is currently located)
+    const sourceColumn = activeProject.columns.find(col =>
+      col.taskIds.includes(taskId)
+    );
+
+    if (!sourceColumn) return;
+
+    // Check if we're dropping on a column or on another task
+    const targetColumn = activeProject.getColumnById(overId);
+
+    if (targetColumn) {
+      // Dropping on a column
+      if (sourceColumn.id !== targetColumn.id) {
+        // Moving to a different column
+        actions.moveTask(activeProject.id, taskId, targetColumn.id);
       }
-    } else if (overData?.type === 'dropZone') {
-      // Dropping on a specific drop zone within a column
-      const targetColumnId = overData.columnId;
-      const targetColumn = activeProject.getColumnById(targetColumnId);
-      if (targetColumn) {
-        actions.moveTask(activeProject.id, taskId, targetColumnId);
+      // If dropping on the same column, no action needed for reordering
+    } else {
+      // Dropping on a task - check if it's in the same column
+      const targetTaskColumn = activeProject.columns.find(col =>
+        col.taskIds.includes(overId)
+      );
+
+      if (targetTaskColumn && sourceColumn.id === targetTaskColumn.id) {
+        // Reordering within the same column
+        // Calculate the new position based on where we dropped
+        const currentIndex = sourceColumn.taskIds.indexOf(taskId);
+        const targetIndex = sourceColumn.taskIds.indexOf(overId);
+
+        if (currentIndex !== -1 && targetIndex !== -1) {
+          // Create new task order
+          const newTaskIds = arrayMove(sourceColumn.taskIds, currentIndex, targetIndex);
+          actions.reorderTasks(activeProject.id, sourceColumn.id, newTaskIds);
+        }
+      } else if (targetTaskColumn) {
+        // Moving to a different column
+        actions.moveTask(activeProject.id, taskId, targetTaskColumn.id);
       }
     }
   };
@@ -181,7 +195,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
 
       {/* Kanban Board */}
       <DndContext
-        collisionDetection={customCollisionDetection}
+        collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

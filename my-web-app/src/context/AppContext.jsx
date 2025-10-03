@@ -12,6 +12,7 @@ const ACTIONS = {
   UPDATE_TASK: 'UPDATE_TASK',
   DELETE_TASK: 'DELETE_TASK',
   MOVE_TASK: 'MOVE_TASK',
+  REORDER_TASKS: 'REORDER_TASKS',
   ADD_COLUMN: 'ADD_COLUMN',
   UPDATE_COLUMN: 'UPDATE_COLUMN',
   DELETE_COLUMN: 'DELETE_COLUMN',
@@ -265,6 +266,19 @@ function appReducer(state, action) {
       };
     }
 
+    case ACTIONS.REORDER_TASKS: {
+      const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
+        const column = project.getColumnById(action.payload.columnId);
+        if (column) {
+          column.taskIds = action.payload.taskIds;
+        }
+      });
+      return {
+        ...state,
+        projects,
+      };
+    }
+
     case ACTIONS.ADD_COLUMN: {
       const projects = updateProjects(state.projects, action.payload.projectId, (project) => {
         if (!project.getColumnById(action.payload.column.id)) {
@@ -512,6 +526,8 @@ export function AppProvider({ children }) {
     deleteTask: (projectId, taskId) => dispatch({ type: ACTIONS.DELETE_TASK, payload: { projectId, taskId } }),
     moveTask: (projectId, taskId, targetColumnId) =>
       dispatch({ type: ACTIONS.MOVE_TASK, payload: { projectId, taskId, targetColumnId } }),
+    reorderTasks: (projectId, columnId, taskIds) =>
+      dispatch({ type: ACTIONS.REORDER_TASKS, payload: { projectId, columnId, taskIds } }),
 
     // Column actions
     addColumn: (projectId, column) => dispatch({ type: ACTIONS.ADD_COLUMN, payload: { projectId, column } }),
