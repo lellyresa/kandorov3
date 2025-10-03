@@ -149,7 +149,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={handleProjectSave}
-                    className="p-2 rounded-lg bg-green-600/80 hover:bg-green-600 text-white transition-colors"
+                    className="p-2 rounded-lg bg-green-600/20 hover:bg-green-600/30 text-green-400 hover:text-green-300 transition-colors"
                     title="Save"
                     aria-label="Save"
                   >
