@@ -209,7 +209,7 @@ export default function TaskCard({
               className={`px-3 py-[5px] rounded-full text-xs font-mono ${
                 isFocusTask
                   ? 'bg-accent-500/30 text-accent-100 border border-accent-500/50'
-                  : 'bg-gray-700/80 text-gray-200'
+                  : 'bg-gray-700/80 text-gray-200 border border-gray-600/60'
               }`}
             >
               {formatWorkTime(task.workSeconds)}
