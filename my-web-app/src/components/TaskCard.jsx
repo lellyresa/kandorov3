@@ -140,11 +140,12 @@ export default function TaskCard({
     >
       {/* Priority Corner Sweep (CSS radial gradient) */}
       <div
-        className="absolute bottom-0 left-0 w-12 h-12 rounded-bl-xl pointer-events-none"
+        className="absolute bottom-0 left-0 w-6 h-6 rounded-bl-xl pointer-events-none"
         aria-hidden="true"
         style={{
-          background: `radial-gradient(120% 120% at 0% 100%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.45) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.20) 45%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0) 75%)`,
+          background: `radial-gradient(120% 120% at 0% 100%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.56) 0%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0.18) 40%, rgba(${getPriorityRgb(task.priority).r}, ${getPriorityRgb(task.priority).g}, ${getPriorityRgb(task.priority).b}, 0) 60%)`,
           zIndex: 0,
+          filter: 'brightness(1.25)'
         }}
       />
       <div className="p-4">
