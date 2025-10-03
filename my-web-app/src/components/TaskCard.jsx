@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Clock, CheckCircle, Circle, CircleDot, ChevronRight, Calendar } from 'lucide-react';
+import { Clock, CheckCircle, Circle, CircleDot, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function TaskCard({
@@ -171,7 +171,6 @@ export default function TaskCard({
 
             {/* Due Date */}
             <div className="flex items-center space-x-1 text-gray-400">
-              <Calendar className="w-3 h-3" />
               <span>
                 {formatDueDate(task.dueDate) || 'No due date'}
               </span>
