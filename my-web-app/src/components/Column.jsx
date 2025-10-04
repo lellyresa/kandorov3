@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TaskCard from './TaskCard';
@@ -48,61 +49,55 @@ export default function Column({ column, tasks, projectId }) {
     setPendingTitle(column.title);
   };
 
+  const contextMenuRef = React.useRef(null);
+  const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
+  const [contextMenuPos, setContextMenuPos] = React.useState({ x: 0, y: 0 });
+
   const handleDeleteColumn = () => {
-    if (window.confirm(`Are you sure you want to delete the "${column.title}" column? This action cannot be undone.`)) {
+    const project = state.projects.find((p) => p.id === projectId);
+    const columnCount = project ? project.columns.length : 0;
+    if (columnCount <= 1) {
+      alert('Cannot delete the last remaining column.');
+      return;
+    }
+    const taskCount = tasks.length;
+    const confirmed = window.confirm(`Delete '${column.title}' and all ${taskCount} task${taskCount === 1 ? '' : 's'} inside?`);
+    if (confirmed) {
       actions.deleteColumn(projectId, column.id);
     }
   };
 
-  // Right-click context menu state
-  const contextRef = React.useRef(null);
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ left: 0, top: 0 });
+  const handleHeaderContextMenu = (e) => {
+    e.preventDefault();
+    const margin = 8;
+    const menuWidth = 180;
+    const menuHeight = 44;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const safeX = Math.min(e.clientX, viewportWidth - menuWidth - margin);
+    const safeY = Math.min(e.clientY, viewportHeight - menuHeight - margin);
+    setContextMenuPos({ x: Math.max(margin, safeX), y: Math.max(margin, safeY) });
+    setContextMenuOpen(true);
+  };
 
   React.useEffect(() => {
     const onDocClick = (e) => {
-      if (!contextRef.current) return;
-      if (contextRef.current.contains(e.target)) return;
-      setMenuOpen(false);
+      if (!contextMenuRef.current) return;
+      if (contextMenuRef.current.contains(e.target)) return;
+      setContextMenuOpen(false);
     };
-    const onEsc = (e) => {
-      if (e.key === 'Escape') setMenuOpen(false);
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setContextMenuOpen(false);
     };
-    if (menuOpen) {
+    if (contextMenuOpen) {
       document.addEventListener('mousedown', onDocClick);
-      document.addEventListener('keydown', onEsc);
+      document.addEventListener('keydown', onKeyDown);
     }
     return () => {
       document.removeEventListener('mousedown', onDocClick);
-      document.removeEventListener('keydown', onEsc);
+      document.removeEventListener('keydown', onKeyDown);
     };
-  }, [menuOpen]);
-
-  const openContextMenu = (e) => {
-    e.preventDefault();
-    // Start by placing at cursor with a tiny offset so pointer doesn't overlap
-    const left = e.clientX + 4;
-    const top = e.clientY + 4;
-    setMenuPos({ left, top });
-    setMenuOpen(true);
-  };
-
-  // After the menu opens, measure and adjust to keep within the viewport
-  React.useEffect(() => {
-    if (!menuOpen || !contextRef.current) return;
-    const rect = contextRef.current.getBoundingClientRect();
-    let { left, top } = menuPos;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const padding = 8;
-
-    if (left + rect.width > vw - padding) left = Math.max(padding, vw - rect.width - padding);
-    if (top + rect.height > vh - padding) top = Math.max(padding, vh - rect.height - padding);
-
-    if (left !== menuPos.left || top !== menuPos.top) {
-      setMenuPos({ left, top });
-    }
-  }, [menuOpen, menuPos.left, menuPos.top]);
+  }, [contextMenuOpen]);
 
   const handleDeleteTask = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
@@ -116,18 +111,43 @@ export default function Column({ column, tasks, projectId }) {
 
   return (
     <div
-      className={`modern-card flex flex-col h-full min-w-80 max-w-80 transition-colors duration-200 ${
-        isActiveColumn ? 'border-accent-500/30 bg-gray-900/80' : ''
-      }`}
+      className={`flex flex-col h-full transition-colors duration-200 overflow-hidden`}
+      style={{
+        background: 'linear-gradient(180deg, #151515 0%, #0F0F0F 100%)',
+        backgroundColor: '#121212',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        borderRadius: 16,
+        padding: isActiveColumn ? 24 : 0,
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
+        flex: '1 1 0%',
+        minWidth: 320,
+        maxWidth: 420
+      }}
     >
       {isActiveColumn ? (
-        <div className="p-4 pb-2">
+        <div className="pb-2">
           <PomodoroTimer />
         </div>
       ) : (
-        <div className="p-4 border-b border-gray-700/40 relative z-10" onContextMenu={openContextMenu}>
+        <div className="p-6 pb-4 border-b border-transparent relative z-10" onContextMenu={handleHeaderContextMenu}>
           <div className="flex items-center justify-between group/header relative">
             <div className="flex items-center space-x-2">
+              <span
+                className="inline-flex items-center justify-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  minWidth: '32px',
+                  textAlign: 'center',
+                  color: '#999999',
+                }}
+              >
+                {tasks.length}
+              </span>
               {isEditingTitle ? (
                 <input
                   type="text"
@@ -138,71 +158,78 @@ export default function Column({ column, tasks, projectId }) {
                     if (e.key === 'Enter') commitTitle();
                     if (e.key === 'Escape') cancelTitle();
                   }}
-                  className="bg-transparent border border-gray-600/50 rounded px-2 py-1 text-white text-sm focus:outline-none focus:border-accent-500/60"
+                  className="bg-transparent border border-gray-700/60 rounded px-2 py-1 text-white text-[16px] tracking-[-0.01em] focus:outline-none focus:border-white/30"
                   autoFocus
                 />
               ) : (
                 <h3
-                  className="font-semibold text-white cursor-text hover:text-accent-200 transition-colors"
+                  className="font-semibold text-white cursor-text hover:text-white/80 transition-colors text-[16px] tracking-[-0.01em]"
                   onClick={startEditTitle}
                   title="Click to rename column"
                 >
                   {column.title}
                 </h3>
               )}
-              <span
-                className="px-2.5 py-0.5 text-xs font-medium rounded-full text-gray-300 leading-none text-center inline-flex items-center justify-center"
-                style={{ backgroundColor: 'rgba(255,255,255,0.08)', minWidth: '1.75rem' }}
-              >
-                {tasks.length}
-              </span>
             </div>
 
             <div className="flex items-center space-x-1">
-              <button
-                onClick={handleAddTask}
-                className="p-1.5 text-gray-400 hover:text-accent-400 rounded-md hover:bg-gray-700/50 transition-colors"
-                title="Add task"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+              <div>
+                <button
+                  onClick={handleAddTask}
+                  className="rounded-full p-[6px] border border-transparent hover:bg-white/10 hover:border-white/20 transform hover:scale-105 transition-all duration-150 ease-in-out"
+                  title="Add task"
+                >
+                  <Plus className="w-5 h-5" style={{ color: '#666666' }} />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Right-click context menu */}
-          {menuOpen && (
-            <div
-              ref={contextRef}
-              role="menu"
-              className="fixed z-[100] rounded-md border"
-              style={{
-                left: `${menuPos.left}px`,
-                top: `${menuPos.top}px`,
-                background: 'rgba(30, 41, 59, 0.95)',
-                borderColor: 'rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2)'
-              }}
-            >
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  if (window.confirm(`Delete '${column.title}' and all ${tasks.length} tasks inside?`)) {
-                    handleDeleteColumn();
-                  }
+          {contextMenuOpen && createPortal(
+            (
+              <div
+                ref={contextMenuRef}
+                role="menu"
+                style={{
+                  position: 'fixed',
+                  top: `${contextMenuPos.y}px`,
+                  left: `${contextMenuPos.x}px`,
+                  background: 'rgba(30, 41, 59, 0.95)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '6px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2)',
+                  zIndex: 100,
                 }}
-                className="px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-[background] duration-150 cursor-pointer"
-                role="menuitem"
               >
-                Delete Column
-              </button>
-            </div>
+                <button
+                  onClick={() => {
+                    setContextMenuOpen(false);
+                    handleDeleteColumn();
+                  }}
+                  className="block w-full text-left text-sm hover:bg-[rgba(239,68,68,0.1)] transition-[background] duration-150"
+                  style={{
+                    padding: '8px 16px',
+                    color: '#EF4444',
+                    background: 'transparent',
+                    borderRadius: '6px',
+                  }}
+                >
+                  Delete Column
+                </button>
+              </div>
+            ),
+            document.body
+          )}
+
+          {column.description && (
+            <p className="mt-3 text-sm text-gray-300">{column.description}</p>
           )}
         </div>
       )}
 
       <div
         ref={setNodeRef}
-        className={`flex-1 overflow-y-auto ${isActiveColumn ? 'px-4 pb-4 pt-2' : 'p-4'} transition-colors duration-200 relative ${
+        className={`flex-1 overflow-y-auto ${isActiveColumn ? 'pt-2' : 'p-4'} transition-colors duration-200 relative ${
           isOver ? 'bg-accent-500/5' : ''
         }`}
       >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, CheckCircle, Circle, Calendar } from 'lucide-react';
+import { X, Trash2, CheckCircle, Circle, Calendar, Edit3 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 // DatePicker Component
@@ -48,7 +48,16 @@ function DatePicker({ value, onChange, onClose }) {
   const calendarDays = generateCalendarDays();
 
   return (
-    <div className="absolute top-full left-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 min-w-[320px]">
+    <div
+      className="absolute top-full left-0 mt-2 z-50 min-w-[320px]"
+      style={{
+        background: 'linear-gradient(180deg, #1E1E1E 0%, #161616 100%)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 12,
+        padding: 16,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 8px 24px rgba(0,0,0,0.6)'
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={(e) => {
@@ -91,13 +100,20 @@ function DatePicker({ value, onChange, onClose }) {
               e.stopPropagation();
               date && handleDateClick(date);
             }}
-            className={`text-center py-2 text-sm rounded hover:bg-gray-700 ${
+            className={`text-center py-2 text-sm rounded ${
               date
                 ? date.toDateString() === selectedDate.toDateString()
-                  ? 'bg-accent-600 text-white'
+                  ? 'text-white'
                   : 'text-gray-300 hover:text-white'
                 : ''
             }`}
+            style={
+              date
+                ? (date.toDateString() === selectedDate.toDateString()
+                    ? { background: 'rgba(255,255,255,0.1)' }
+                    : { })
+                : { }
+            }
             disabled={!date}
           >
             {date ? date.getDate() : ''}
@@ -112,7 +128,7 @@ function DatePicker({ value, onChange, onClose }) {
           <select
             value={selectedHour}
             onChange={(e) => setSelectedHour(parseInt(e.target.value))}
-            className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+            className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             {Array.from({ length: 24 }, (_, i) => (
@@ -125,7 +141,7 @@ function DatePicker({ value, onChange, onClose }) {
           <select
             value={selectedMinute}
             onChange={(e) => setSelectedMinute(parseInt(e.target.value))}
-            className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+            className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             {Array.from({ length: 60 }, (_, i) => (
@@ -163,7 +179,7 @@ function DatePicker({ value, onChange, onClose }) {
               e.stopPropagation();
               handleTimeSet();
             }}
-            className="px-3 py-1.5 text-xs bg-accent-600 hover:bg-accent-700 text-white rounded-lg transition-colors"
+            className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
           >
             Set Date
           </button>
@@ -180,6 +196,8 @@ export default function TaskModal() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentDueDate, setCurrentDueDate] = useState(null);
   const [currentTask, setCurrentTask] = useState(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [tempTitle, setTempTitle] = useState('');
 
   const { isOpen, task, projectId, columnId, mode } = state.taskModal;
 
@@ -228,6 +246,40 @@ export default function TaskModal() {
         setEditTitle(currentTask.title);
       }
     }
+  };
+
+  const handleTitleClick = () => {
+    if (mode === 'edit') {
+      setIsEditingTitle(true);
+      setTempTitle(editTitle);
+    }
+  };
+
+  const handleTitleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      handleTitleCancel();
+    }
+  };
+
+  const handleTitleSave = () => {
+    if (tempTitle.trim()) {
+      setEditTitle(tempTitle.trim());
+      if (mode === 'edit' && projectId && currentTask && tempTitle.trim() !== currentTask.title) {
+        const updatedTask = { ...currentTask, title: tempTitle.trim() };
+        setCurrentTask(updatedTask);
+        actions.updateTask(projectId, updatedTask);
+      }
+    } else if (mode === 'edit' && currentTask) {
+      setEditTitle(currentTask.title);
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setTempTitle(editTitle);
+    setIsEditingTitle(false);
   };
 
   const handleDescriptionBlur = () => {
@@ -316,10 +368,10 @@ export default function TaskModal() {
   // Handle case where task might not be loaded yet (only for edit mode)
   if (mode === 'edit' && !task) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-        <div className="w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-8">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+        <div className="w-full max-w-2xl p-8" style={{ background: 'linear-gradient(180deg, #1E1E1E 0%, #161616 100%)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 8px 24px rgba(0,0,0,0.6)' }}>
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/40 mx-auto mb-4"></div>
             <p className="text-gray-400">Loading task...</p>
           </div>
         </div>
@@ -327,189 +379,280 @@ export default function TaskModal() {
     );
   }
 
-  const formatTimeAgo = (date) => {
-    const now = new Date();
-    const taskDate = new Date(date);
-    const diffInMs = now - taskDate;
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays} days ago`;
-    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-    if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
-    return `${Math.floor(diffInDays / 365)} years ago`;
-  };
-
-  const formatDueDate = (date) => {
+  const formatDueDateField = (date) => {
     if (!date) return 'No due date';
     const dueDate = new Date(date);
     return dueDate.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
     });
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'low': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
-  };
+  // Removed old colored pill helper; replaced with neutral + selected color styles above
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       onClick={handleBackdropClick}
       onKeyDown={handleKeyPress}
     >
-      <div className="relative w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700/50">
-          <h2 className="text-2xl font-bold text-white">
-            {mode === 'create' ? 'Create New Task' : 'Edit Task'}
-          </h2>
-          <div className="flex items-center space-x-3">
-            {mode === 'create' && (
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                Create Task
-              </button>
-            )}
-            <button
-              onClick={handleClose}
-              className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      <div
+        className="relative w-full max-w-2xl"
+        style={{
+          background: 'linear-gradient(180deg, #1E1E1E 0%, #161616 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 16,
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 8px 24px rgba(0, 0, 0, 0.6)'
+        }}
+      >
+        {/* Close button (absolute, works for both modes) */}
+        <button
+          onClick={handleClose}
+          className="rounded-full absolute"
+          style={{
+            top: 16,
+            right: 16,
+            width: 32,
+            height: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#666666',
+            borderRadius: '50%'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#FFFFFF'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#666666'; }}
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Header (edit mode only) */}
+        {mode === 'edit' && (
+          <div className="flex items-center justify-between" style={{ padding: '24px 0', paddingRight: 56, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="flex-1">
+              {isEditingTitle ? (
+                <input
+                  type="text"
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  onBlur={handleTitleSave}
+                  onKeyDown={handleTitleKeyDown}
+                  className="w-full outline-none"
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: 6,
+                    padding: '8px 12px',
+                    boxShadow: '0 0 0 3px rgba(255,255,255,0.05)'
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <div
+                  onClick={handleTitleClick}
+                  className="group cursor-text transition-all duration-150 ease-in-out relative"
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    padding: '8px 12px',
+                    borderRadius: 6
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  {editTitle || currentTask?.title || 'Untitled task'}
+                  <Edit3 
+                    className="absolute -right-6 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                    size={14}
+                    style={{ color: '#666666' }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Title and Time */}
-          <div className="space-y-2">
-            <input
-              type="text"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              onBlur={handleTitleBlur}
-              className="w-full text-2xl font-bold bg-transparent border-none outline-none text-white placeholder-gray-500 focus:ring-0 hover:bg-gray-800/30 rounded-lg px-2 py-1 -mx-2 transition-colors"
-              placeholder="Task title"
-            />
-            <p className="text-sm text-gray-400">
-              {formatTimeAgo(currentTask?.createdAt)}
-            </p>
-          </div>
+        <div style={{ padding: 32 }} className="space-y-6">
+          {/* Title (create mode only) */}
+          {mode === 'create' && (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                onBlur={handleTitleBlur}
+                className="w-full outline-none"
+                style={{
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 8,
+                  padding: '12px 16px'
+                }}
+                onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.15)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.05)'; }}
+                onBlurCapture={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.06)'; e.currentTarget.style.boxShadow = 'none'; }}
+                placeholder="Task title"
+              />
+            </div>
+          )}
 
           {/* Description */}
           <div className="space-y-2">
-            <div className="text-sm text-gray-400 uppercase tracking-wide">Description</div>
+            <div className="text-[11px] font-semibold" style={{ color: '#666666', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Description</div>
             <textarea
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
               onBlur={handleDescriptionBlur}
-              className="w-full min-h-[120px] bg-gray-800/30 hover:bg-gray-800/50 border border-transparent hover:border-gray-600/50 focus:border-accent-500/50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 resize-none transition-colors"
+              className="w-full min-h-[120px] resize-none"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 8,
+                padding: '12px 16px',
+                color: '#FFFFFF'
+              }}
+              onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.15)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.05)'; }}
+              onBlurCapture={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.06)'; e.currentTarget.style.boxShadow = 'none'; }}
               placeholder="Add a description..."
               rows={4}
             />
           </div>
 
-          {/* Due Date */}
-          <div className="space-y-2">
-            <div className="text-sm text-gray-400 uppercase tracking-wide">Due Date</div>
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDatePicker(!showDatePicker);
-                }}
-                className="w-full bg-gray-800/30 rounded-lg px-4 py-3 text-left hover:bg-gray-800/50 transition-colors flex items-center justify-between"
-              >
-                <p className="text-white text-sm">
-                  {formatDueDate(currentDueDate)}
-                </p>
-                <Calendar className="w-4 h-4 text-gray-400" />
-              </button>
-              {showDatePicker && (
-                <DatePicker
-                  key={currentDueDate}
-                  value={currentDueDate}
-                  onChange={(newDate) => {
-                    setCurrentDueDate(newDate);
-                    if (currentTask) {
-                      const updatedTask = { ...currentTask, dueDate: newDate };
-                      setCurrentTask(updatedTask);
-                      actions.updateTask(projectId, updatedTask);
-                    }
-                    setShowDatePicker(false);
-                  }}
-                  onClose={() => setShowDatePicker(false)}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Priority Pills */}
-          <div className="space-y-3">
-            <div className="text-sm text-gray-400 uppercase tracking-wide">Priority</div>
-            <div className="flex items-center space-x-2">
-              {['low', 'medium', 'high'].map((priority) => (
+          {/* Due Date and Priority Row */}
+          <div className="flex items-start space-x-6">
+            {/* Due Date (left 50%) */}
+            <div className="flex-1">
+              <div className="text-[11px] font-semibold mb-2" style={{ color: '#666666', letterSpacing: '0.1em', textTransform: 'uppercase' }}>DUE DATE</div>
+              <div className="relative">
                 <button
-                  key={priority}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
-                    (currentTask?.priority?.toLowerCase() === priority)
-                      ? getPriorityColor(priority)
-                      : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50 hover:text-gray-300'
-                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handlePriorityChange(priority);
+                    setShowDatePicker(!showDatePicker);
                   }}
+                  className="w-full text-left flex items-center justify-between"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: 8,
+                    padding: '12px 16px'
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.15)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.05)'; }}
+                  onBlur={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.06)'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
-                  {priority.toUpperCase()}
+                  <p className="text-white text-sm">
+                    {formatDueDateField(currentDueDate)}
+                  </p>
+                  <Calendar className="w-4 h-4" style={{ color: '#666666' }} />
                 </button>
-              ))}
+                {showDatePicker && (
+                  <DatePicker
+                    key={currentDueDate}
+                    value={currentDueDate}
+                    onChange={(newDate) => {
+                      setCurrentDueDate(newDate);
+                      if (currentTask) {
+                        const updatedTask = { ...currentTask, dueDate: newDate };
+                        setCurrentTask(updatedTask);
+                        actions.updateTask(projectId, updatedTask);
+                      }
+                      setShowDatePicker(false);
+                    }}
+                    onClose={() => setShowDatePicker(false)}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Priority (right 50%) */}
+            <div className="flex-1">
+              <div className="text-[11px] font-semibold mb-2" style={{ color: '#666666', letterSpacing: '0.1em', textTransform: 'uppercase' }}>PRIORITY</div>
+              <div className="flex items-center justify-between space-x-2">
+                {['low', 'medium', 'high'].map((priority) => {
+                  const selected = currentTask?.priority?.toLowerCase() === priority;
+                  const colorMap = {
+                    low: '#4ADE80',
+                    medium: '#FFC107',
+                    high: '#FF6B6B',
+                  };
+                  const color = colorMap[priority];
+                  return (
+                    <button
+                      key={priority}
+                      onClick={(e) => { e.stopPropagation(); handlePriorityChange(priority); }}
+                      style={{
+                        padding: '8px 20px',
+                        borderRadius: 20,
+                        background: selected ? `${color}14` : 'rgba(255,255,255,0.03)',
+                        border: selected ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.06)',
+                        color: selected ? color : '#999999',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        flex: 1,
+                        textAlign: 'center'
+                      }}
+                    >
+                      {priority.toUpperCase()}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
-            <div className="flex items-center space-x-2">
-              {currentTask?.status === 'done' ? (
-                <div className="flex items-center space-x-2 text-green-400">
-                  <CheckCircle className="w-5 h-5" />
-                  <span className="font-medium">Completed</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2 text-gray-400">
-                  <Circle className="w-5 h-5" />
-                  <span className="font-medium">In Progress</span>
-                </div>
+          {/* Bottom Actions */}
+          <div className="flex items-center justify-between pt-2" style={{ marginTop: 24 }}>
+            <div>
+              {mode === 'edit' && (
+                <button
+                  onClick={handleDelete}
+                  className="rounded-full"
+                  style={{
+                    padding: '10px 24px',
+                    background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    color: '#EF4444',
+                    fontWeight: 600
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; }}
+                >
+                  Delete
+                </button>
               )}
             </div>
 
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 border border-red-600/30 hover:border-red-600/50 text-sm font-medium rounded-lg transition-colors"
-            >
-              Delete Task
-            </button>
-          </div>
-        </div>
-
-        {/* Keyboard shortcuts hint */}
-        <div className="px-6 pb-4">
-          <div className="text-xs text-gray-500 text-center">
-            Press <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Escape</kbd> to close
+            <div>
+              <button
+                onClick={handleSave}
+                className="rounded-full"
+                style={{
+                  padding: '10px 28px',
+                  background: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#FFFFFF',
+                  fontWeight: 600,
+                  transform: 'scale(1)',
+                  transition: 'transform 120ms ease, background 120ms ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              >
+                {mode === 'create' ? 'Create' : 'Save'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

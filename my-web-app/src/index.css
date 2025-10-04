@@ -16,7 +16,7 @@ html, body {
   line-height: 1.5;
   /* Dark theme base colors */
   color: #f1f5f9;
-  background-color: #0f172a;
+  background-color: #0A0A0A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -43,14 +43,14 @@ html, body {
 
 /* Modern focus styles for dark theme */
 *:focus {
-  outline: 2px solid #0ea5e9;
+  outline: 2px solid rgba(255,255,255,0.25);
   outline-offset: 2px;
 }
 
 /* Selection styles for dark theme */
 ::selection {
-  background-color: #0ea5e9;
-  color: #0f172a;
+  background-color: rgba(255,255,255,0.15);
+  color: #ffffff;
 }
 
 /* Smooth scrolling */
@@ -70,8 +70,8 @@ html {
 }
 
 @keyframes glow {
-  from { box-shadow: 0 0 5px #0ea5e9; }
-  to { box-shadow: 0 0 20px #0ea5e9, 0 0 30px #0ea5e9; }
+  from { box-shadow: 0 0 5px rgba(255,255,255,0.25); }
+  to { box-shadow: 0 0 20px rgba(255,255,255,0.25), 0 0 30px rgba(255,255,255,0.25); }
 }
 
 .animate-fade-in {
@@ -139,7 +139,7 @@ html {
 }
 
 .sidebar-item.active {
-  @apply bg-accent-600/20 text-accent-400 border border-accent-500/30;
+  @apply bg-white/5 text-white border border-white/10;
 }
 
 /* Premium button styles */

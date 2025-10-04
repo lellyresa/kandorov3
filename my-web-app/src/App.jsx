@@ -13,7 +13,7 @@ function App() {
 
   return (
     <AppProvider>
-      <div className="min-h-screen bg-dark-900 flex">
+      <div className="min-h-screen flex" style={{ backgroundColor: '#0A0A0A' }}>
         <Sidebar onCreateProject={openProjectForm} />
         <main className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto min-h-0">

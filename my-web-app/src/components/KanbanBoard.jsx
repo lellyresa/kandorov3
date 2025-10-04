@@ -201,7 +201,7 @@ export default function KanbanBoard({ onCreateProject = () => {} }) {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-6 overflow-x-auto pb-4 min-h-0">
+        <div className="flex gap-5 overflow-x-auto pb-4 min-h-0 flex-1">
           {activeProject.columns
             .sort((a, b) => a.position - b.position)
             .map((column) => {

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Play, Pause, RotateCcw, FastForward, Rewind, Cog } from 'lucide-react';
+import { Play, Pause, RotateCcw, FastForward, Cog } from 'lucide-react';
 
 export default function PomodoroTimer() {
   const { state, actions } = useApp();
@@ -72,65 +72,90 @@ export default function PomodoroTimer() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between text-gray-500 text-xs uppercase tracking-[0.35em]">
-        <span>{pomodoroState.isWorkSession ? 'Focus' : 'Break'}</span>
-        <button className="p-1.5 text-gray-600 hover:text-gray-300 transition-colors" title="Timer settings">
-          <Cog className="w-4 h-4" />
-        </button>
-      </div>
-
       <div
-        className="rounded-3xl bg-gray-900/70 border border-gray-800/60 px-6 py-8 shadow-dark-medium flex flex-col items-center gap-6"
-        style={
-          pomodoroState.isActive
-            ? {
-                boxShadow:
-                  '0 0 0 2px rgba(14, 165, 233, 0.25), 0 12px 30px rgba(14, 165, 233, 0.12)'
-              }
-            : undefined
-        }
+        className="flex flex-col items-center"
+        style={{ paddingTop: 16 }}
       >
-        <div className="text-6xl md:text-7xl font-semibold tracking-tight text-white">
-          {formatTime(pomodoroState.timeRemaining)}
-        </div>
-        <div className="text-xs tracking-[0.4em] uppercase text-gray-500">
-          {pomodoroState.isWorkSession ? 'Focus Session' : 'Break Session'}
-        </div>
-        <div className="flex items-center gap-5 text-gray-300">
-          <button
-            onClick={switchToWorkSession}
-            className="p-2.5 rounded-full hover:bg-gray-800 transition-colors"
-            title="Previous"
+        <div
+          className="w-full flex flex-col items-center"
+          style={{
+            background: 'linear-gradient(135deg, #1A1A1A 0%, #0F0F0F 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRadius: 12,
+            padding: '32px 24px',
+            boxShadow: `${pomodoroState.isActive ? '0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 24px rgba(255, 255, 255, 0.15), ' : ''}0 4px 16px rgba(0, 0, 0, 0.4)`
+          }}
+        >
+          <div
+            className="text-white font-bold"
+            style={{ fontSize: 64, letterSpacing: '-0.02em', lineHeight: 1 }}
           >
-            <Rewind className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleStartPause}
-            className="p-4 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors"
-            title={pomodoroState.isActive ? 'Pause' : 'Start'}
+            {formatTime(pomodoroState.timeRemaining)}
+          </div>
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 13,
+              fontWeight: 500,
+              color: '#808080',
+              letterSpacing: '0.02em',
+              textTransform: 'capitalize',
+            }}
           >
-            {pomodoroState.isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-          </button>
-          <button
-            onClick={switchToBreak}
-            className="p-2.5 rounded-full hover:bg-gray-800 transition-colors"
-            title="Next"
-          >
-            <FastForward className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleReset}
-            className="p-2.5 rounded-full hover:bg-gray-800 transition-colors"
-            title="Restart"
-          >
-            <RotateCcw className="w-5 h-5" />
-          </button>
+            {pomodoroState.isWorkSession ? 'Focus' : 'Break'} • {Math.max(1, Math.round(pomodoroState.timeRemaining / 60))} min
+          </div>
+          <div className="flex items-center justify-center" style={{ gap: 20, marginTop: 24 }}>
+            <button
+              onClick={handleStartPause}
+              className="rounded-full text-[#666666] hover:text-white transition-all duration-200 ease-in-out hover:scale-110 hover:bg-white/10"
+              style={{ padding: 8 }}
+              title={pomodoroState.isActive ? 'Pause' : 'Start'}
+            >
+              {pomodoroState.isActive ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => (pomodoroState.isWorkSession ? switchToBreak() : switchToWorkSession())}
+              className="rounded-full text-[#666666] hover:text-white transition-all duration-200 ease-in-out hover:scale-110 hover:bg-white/10"
+              style={{ padding: 8 }}
+              title="Skip"
+            >
+              <FastForward className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleReset}
+              className="rounded-full text-[#666666] hover:text-white transition-all duration-200 ease-in-out hover:scale-110 hover:bg-white/10"
+              style={{ padding: 8 }}
+              title="Reset"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+            <button
+              className="rounded-full text-[#666666] hover:text-white transition-all duration-200 ease-in-out hover:scale-110 hover:bg-white/10"
+              style={{ padding: 8 }}
+              title="Settings"
+            >
+              <Cog className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500 uppercase tracking-[0.2em]">
-        <span>Today</span>
-        <span>{pomodoroState.completedPomodoros} sessions</span>
+      <div style={{ marginTop: 24 }}>
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: '#666666',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            marginBottom: 6,
+          }}
+        >
+          Today
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: '#999999' }}>
+          {pomodoroState.completedPomodoros} sessions
+        </div>
       </div>
     </div>
   );

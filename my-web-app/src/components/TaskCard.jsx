@@ -103,12 +103,12 @@ export default function TaskCard({
     const msPerDay = 24 * 60 * 60 * 1000;
     const diffDays = Math.round((startOfDue - startOfToday) / msPerDay);
 
-    if (diffDays < 0) return '#DC2626'; // overdue - deep red
+    if (diffDays < 0) return '#EF4444'; // overdue - red
     if (diffDays === 0) return '#EF4444'; // today - red
-    if (diffDays === 1) return '#F97316'; // tomorrow - deep orange
-    if (diffDays >= 2 && diffDays <= 3) return '#FB923C'; // 2-3 days - orange
-    if (diffDays >= 4 && diffDays <= 7) return '#FFC107'; // 4-7 days - yellow
-    return '#4ADE80'; // 8+ days - green (calm)
+    if (diffDays === 1) return '#FB923C'; // tomorrow - orange
+    if (diffDays === 2) return '#FB923C'; // 2 days - orange
+    if (diffDays === 3) return '#FFC107'; // 3 days - yellow
+    return '#999999'; // 4+ days - gray (neutral, no urgency)
   };
 
   const getPriorityBorderHex = (priority) => {
@@ -135,7 +135,14 @@ export default function TaskCard({
       <div
         ref={setNodeRef}
         style={style}
-        className="modern-card border-2 border-accent-500/60 border-solid opacity-80 p-4 shadow-dark-large transform rotate-3 scale-105"
+        className="opacity-80 p-4 transform rotate-3 scale-105"
+      style={{
+          ...style,
+          background: 'linear-gradient(135deg, #1A1A1A 0%, #0F0F0F 100%)',
+          border: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+          borderRadius: 12
+        }}
       >
         <div className="animate-pulse">
           <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
@@ -148,11 +155,17 @@ export default function TaskCard({
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        background: 'linear-gradient(135deg, #1A1A1A 0%, #0F0F0F 100%)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: 12,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
+      }}
       {...attributes}
       {...listeners}
-      className={`modern-card modern-card-hover group cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-[1.02] relative overflow-hidden ${
-        isFocusTask ? 'ring-2 ring-accent-500/40' : ''
+      className={`group cursor-grab active:cursor-grabbing transition-all duration-200 hover:translate-y-[-2px] hover:shadow-[0_4px_16px_rgba(0,0,0,0.7)] relative overflow-hidden ${
+        isFocusTask ? '' : ''
       }`}
     >
       {/* Priority left border */}
@@ -161,12 +174,12 @@ export default function TaskCard({
         style={{ width: '3px', backgroundColor: getPriorityBorderHex(task.priority) }}
         aria-hidden="true"
       />
-      <div className="p-4">
+      <div className="px-5 py-4">
         {/* Clean Top Row */}
         <div className="flex items-start justify-between mb-6">
           {/* Title - Top Left */}
           <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
-            <h4 className="font-medium text-white leading-tight">
+            <h4 className="font-semibold text-white leading-tight text-[16px]">
               {task.title}
             </h4>
           </div>
@@ -185,10 +198,10 @@ export default function TaskCard({
               e.stopPropagation();
               e.preventDefault();
             }}
-            className="p-1 text-gray-400 hover:text-accent-400 transition-colors ml-2"
+            className="p-1 text-[#666666] hover:text-white transition-colors ml-2"
             title="Open task details"
           >
-            <ChevronRight className="w-4 h-4 transition-transform duration-200 hover:rotate-90" />
+            <ChevronRight className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" />
           </button>
         </div>
 
@@ -244,11 +257,12 @@ export default function TaskCard({
             )}
 
             <div
-              className={`px-3 py-[3px] rounded-full text-xs font-mono ${
-                isFocusTask
-                  ? 'bg-accent-500/30 text-accent-100 border border-accent-500/50'
-                  : 'bg-gray-700/80 text-gray-200 border border-gray-600/60'
-              }`}
+              className={`px-3 py-[3px] rounded-full text-xs font-mono`}
+              style={{
+                background: 'rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#808080'
+              }}
             >
               {formatWorkTime(task.workSeconds)}
             </div>
