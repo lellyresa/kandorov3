@@ -160,8 +160,8 @@ export default function Column({ column, tasks, projectId }) {
                   style={{
                     top: 'calc(100% + 8px)',
                     background: 'rgba(30, 41, 59, 0.9)',
-                    backdropFilter: 'blur(12px) saturate(150%)',
-                    WebkitBackdropFilter: 'blur(12px) saturate(150%)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                     boxShadow:
                       '0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
                     borderColor: 'rgba(255,255,255,0.12)'
