@@ -80,14 +80,29 @@ export default function Column({ column, tasks, projectId }) {
 
   const openContextMenu = (e) => {
     e.preventDefault();
-    const menuWidth = 200;
-    const menuHeight = 40;
-    const padding = 8;
-    const left = Math.min(e.clientX, window.innerWidth - menuWidth - padding);
-    const top = Math.min(e.clientY, window.innerHeight - menuHeight - padding);
+    // Start by placing at cursor with a tiny offset so pointer doesn't overlap
+    const left = e.clientX + 4;
+    const top = e.clientY + 4;
     setMenuPos({ left, top });
     setMenuOpen(true);
   };
+
+  // After the menu opens, measure and adjust to keep within the viewport
+  React.useEffect(() => {
+    if (!menuOpen || !contextRef.current) return;
+    const rect = contextRef.current.getBoundingClientRect();
+    let { left, top } = menuPos;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const padding = 8;
+
+    if (left + rect.width > vw - padding) left = Math.max(padding, vw - rect.width - padding);
+    if (top + rect.height > vh - padding) top = Math.max(padding, vh - rect.height - padding);
+
+    if (left !== menuPos.left || top !== menuPos.top) {
+      setMenuPos({ left, top });
+    }
+  }, [menuOpen, menuPos.left, menuPos.top]);
 
   const handleDeleteTask = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
