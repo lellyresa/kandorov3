@@ -4,7 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import TaskCard from './TaskCard';
 import PomodoroTimer from './PomodoroTimer';
 import { COLUMN_TYPES } from '../types';
-import { Plus, Trash2, MoreVertical } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Column({ column, tasks, projectId }) {
@@ -54,24 +54,39 @@ export default function Column({ column, tasks, projectId }) {
     }
   };
 
-  const menuRef = React.useRef(null);
+  // Right-click context menu state
+  const contextRef = React.useRef(null);
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ left: 0, top: 0 });
 
   React.useEffect(() => {
     const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (menuRef.current.contains(e.target)) return;
+      if (!contextRef.current) return;
+      if (contextRef.current.contains(e.target)) return;
       setMenuOpen(false);
+    };
+    const onEsc = (e) => {
+      if (e.key === 'Escape') setMenuOpen(false);
     };
     if (menuOpen) {
       document.addEventListener('mousedown', onDocClick);
+      document.addEventListener('keydown', onEsc);
     }
-    return () => document.removeEventListener('mousedown', onDocClick);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onEsc);
+    };
   }, [menuOpen]);
 
-  const handleArchiveAllTasks = () => {
-    alert('Archive All Tasks is not implemented yet.');
-    setMenuOpen(false);
+  const openContextMenu = (e) => {
+    e.preventDefault();
+    const menuWidth = 200;
+    const menuHeight = 40;
+    const padding = 8;
+    const left = Math.min(e.clientX, window.innerWidth - menuWidth - padding);
+    const top = Math.min(e.clientY, window.innerHeight - menuHeight - padding);
+    setMenuPos({ left, top });
+    setMenuOpen(true);
   };
 
   const handleDeleteTask = (taskId) => {
@@ -95,7 +110,7 @@ export default function Column({ column, tasks, projectId }) {
           <PomodoroTimer />
         </div>
       ) : (
-        <div className="p-4 border-b border-gray-700/40 relative z-10">
+        <div className="p-4 border-b border-gray-700/40 relative z-10" onContextMenu={openContextMenu}>
           <div className="flex items-center justify-between group/header relative">
             <div className="flex items-center space-x-2">
               {isEditingTitle ? (
@@ -136,73 +151,36 @@ export default function Column({ column, tasks, projectId }) {
               >
                 <Plus className="w-4 h-4" />
               </button>
-
-              {/* Kebab menu - shown on hover or when open */}
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setMenuOpen((v) => !v)}
-                  className={`p-1.5 rounded-md transition-all text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 ${
-                    menuOpen ? 'opacity-100' : 'opacity-0 group-hover/header:opacity-100'
-                  }`}
-                  title="More"
-                  aria-haspopup="menu"
-                  aria-expanded={menuOpen}
-                >
-                  <MoreVertical className="w-4 h-4" />
-                </button>
-
-                {/* Dropdown menu - always rendered for animations */}
-                <div
-                  role="menu"
-                  className={`absolute right-0 w-44 py-[6px] rounded-lg border z-50 transition-all duration-[150ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    menuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
-                  }`}
-                  style={{
-                    top: 'calc(100% + 8px)',
-                    background: 'rgba(30, 41, 59, 0.9)',
-                    backdropFilter: 'blur(20px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                    boxShadow:
-                      '0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
-                    borderColor: 'rgba(255,255,255,0.12)'
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setIsEditingTitle(true);
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
-                    role="menuitem"
-                  >
-                    Rename Column
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleArchiveAllTasks();
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
-                    role="menuitem"
-                  >
-                    Archive All Tasks
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleDeleteColumn();
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
-                    role="menuitem"
-                  >
-                    Delete Column
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 
-          {column.description && (
-            <p className="mt-3 text-sm text-gray-300">{column.description}</p>
+          {/* Right-click context menu */}
+          {menuOpen && (
+            <div
+              ref={contextRef}
+              role="menu"
+              className="fixed z-[100] rounded-md border"
+              style={{
+                left: `${menuPos.left}px`,
+                top: `${menuPos.top}px`,
+                background: 'rgba(30, 41, 59, 0.95)',
+                borderColor: 'rgba(255,255,255,0.1)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2)'
+              }}
+            >
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  if (window.confirm(`Delete '${column.title}' and all ${tasks.length} tasks inside?`)) {
+                    handleDeleteColumn();
+                  }
+                }}
+                className="px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-[background] duration-150 cursor-pointer"
+                role="menuitem"
+              >
+                Delete Column
+              </button>
+            </div>
           )}
         </div>
       )}
