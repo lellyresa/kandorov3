@@ -159,12 +159,12 @@ export default function Column({ column, tasks, projectId }) {
                   }`}
                   style={{
                     top: 'calc(100% + 8px)',
-                    background: '#1E293B',
-                    backdropFilter: 'blur(12px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                    background: 'rgba(30, 41, 59, 0.9)',
+                    backdropFilter: 'blur(12px) saturate(150%)',
+                    WebkitBackdropFilter: 'blur(12px) saturate(150%)',
                     boxShadow:
                       '0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
-                    borderColor: 'rgba(255,255,255,0.08)'
+                    borderColor: 'rgba(255,255,255,0.12)'
                   }}
                 >
                   <button
@@ -179,6 +179,15 @@ export default function Column({ column, tasks, projectId }) {
                   </button>
                   <button
                     onClick={() => {
+                      handleArchiveAllTasks();
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
+                    role="menuitem"
+                  >
+                    Archive All Tasks
+                  </button>
+                  <button
+                    onClick={() => {
                       setMenuOpen(false);
                       handleDeleteColumn();
                     }}
@@ -186,15 +195,6 @@ export default function Column({ column, tasks, projectId }) {
                     role="menuitem"
                   >
                     Delete Column
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleArchiveAllTasks();
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 transition-[background] duration-150 cursor-pointer"
-                    role="menuitem"
-                  >
-                    Archive All Tasks
                   </button>
                 </div>
               </div>
